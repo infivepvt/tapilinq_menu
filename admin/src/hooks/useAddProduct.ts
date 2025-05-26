@@ -1,0 +1,61 @@
+import api from "../api/axios";
+import { v4 as uuidv4 } from "uuid";
+
+const useAddProduct = () => {
+  const addProduct = async (formData: any) => {
+    try {
+      const fData = new FormData();
+      fData.append("title", formData.name);
+      fData.append("description", formData.description);
+      fData.append("categoryId", formData.categoryId);
+
+      let images = formData.images;
+
+      if (images && images.length > 0) {
+        for (let i = 0; i < images.length; i++) {
+          const img = images[i];
+          let key = uuidv4();
+          fData.append(`img_${key}`, img);
+        }
+      }
+
+      let varients = formData.variants.map((v: any) => {
+        let extras = v.extraItems.map((et: any) => {
+          let img = et.image;
+          let key = uuidv4();
+          fData.append(key, img);
+
+          return {
+            name: et?.name,
+            key,
+            type: et.isAdded ? "add" : "remove",
+            description: et?.description,
+            price: et?.price,
+          };
+        });
+
+        return {
+          name: v?.name,
+          description: v?.description,
+          price: v?.price,
+          extraItems: extras,
+        };
+      });
+
+      fData.append("varients", JSON.stringify(varients));
+
+      return await api.post("/products", fData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    } catch (error: any) {
+      console.log(error);
+
+      throw new Error(error.response?.data?.error || "failed");
+    }
+  };
+  return { addProduct };
+};
+
+export default useAddProduct;
