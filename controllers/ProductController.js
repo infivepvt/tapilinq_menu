@@ -271,8 +271,8 @@ export const updateProduct = asyncHandler(async (req, res) => {
 
   if (productImageFiles.length > 0) {
     let img = await Image.findOne({ where: { productId } });
-    deleteFile(img.path);
-    await img.destroy({ where: { productId } });
+    deleteFile(img?.path);
+    if (img) await img.destroy({ where: { productId } });
   }
 
   for (let i = 0; i < productImageFiles.length; i++) {

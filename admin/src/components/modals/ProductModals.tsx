@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   X,
   Plus,
@@ -15,6 +15,10 @@ import toast from "react-hot-toast";
 import useGetCategories from "../../hooks/useGetCategories";
 import { UPLOADS_URL } from "../../api/urls";
 import useUpdateProduct from "../../hooks/useUpdateProduct";
+import * as LucideIcons from "lucide-react";
+import { set } from "date-fns";
+
+const ICON_LIST = Object.keys(LucideIcons).filter((icon) => icon);
 
 // Interfaces
 interface Category {
@@ -62,6 +66,20 @@ const ProductModals = ({
   const { getCategories } = useGetCategories();
   const { addProduct } = useAddProduct();
   const { updateProduct } = useUpdateProduct();
+  const [iconSearch, setIconSearch] = useState<string>("");
+  const [filteredIcons, setFilteredIcons] = useState([]);
+
+  const searchRef = useRef(null);
+
+  useEffect(() => {
+    const fi = iconSearch
+      ? ICON_LIST.filter((icon) =>
+          icon.toLowerCase().includes(iconSearch.toLowerCase())
+        ).slice(0, 20)
+      : ICON_LIST.slice(0, 20); // or whatever fallback you want when there's no search
+    setFilteredIcons(fi);
+    setShowDropdown(!!iconSearch && fi.length > 0);
+  }, [iconSearch]);
 
   // Load categories
   useEffect(() => {
@@ -369,6 +387,9 @@ const ProductModals = ({
     }
   };
 
+  const [results, setResults] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+
   if (!isOpen) return null;
 
   return (
@@ -608,11 +629,67 @@ const ProductModals = ({
             {/* Variant Form */}
             {isAddingVariant && (
               <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md space-y-4">
-                <h3 className="text-lg font-medium dark:text-white">
-                  {editingVariantIndex !== null
-                    ? "Edit Variant"
-                    : "New Variant"}
-                </h3>
+                <div className="grid grid-cols-3">
+                  <h3 className="text-lg font-medium dark:text-white col-span-1">
+                    {editingVariantIndex !== null
+                      ? "Edit Variant"
+                      : "New Variant"}
+                  </h3>
+                  <div className="col-span-2">
+                    <div
+                      className="relative w-full max-w-md mx-auto mt-10"
+                      ref={searchRef}
+                    >
+                      <input
+                        type="text"
+                        className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Search..."
+                        value={iconSearch}
+                        onChange={(e) => setIconSearch(e.target.value)}
+                        onFocus={() => iconSearch && setShowDropdown(true)}
+                      />
+
+                      {showDropdown && filteredIcons.length > 0 && (
+                        <ul className="absolute z-10 w-full mt-2 bg-white border border-gray-300 rounded-lg shadow-md max-h-60 overflow-y-auto">
+                          {/* Close Button Row */}
+                          <li
+                            className="sticky top-0 bg-white px-4 py-2 border-b flex justify-end"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowDropdown(false);
+                            }}
+                          >
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-gray-500 hover:text-gray-700"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </li>
+
+                          {/* Icons List */}
+                          {filteredIcons.map((result, index) => {
+                            const IconComponent = LucideIcons[result];
+                            return (
+                              <li
+                                key={index}
+                                className="px-4 py-2 hover:bg-blue-100 cursor-pointer flex items-center gap-2"
+                                onClick={() => {
+                                  setIconSearch(result);
+                                  setShowDropdown(false);
+                                }}
+                              >
+                                <IconComponent className="h-5 w-5" />
+                                <span className="text-sm">{result}</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">

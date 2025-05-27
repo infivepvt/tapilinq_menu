@@ -16,16 +16,11 @@ const __dirname = dirname(__filename);
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
-const publicLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500,
-  message: "Too many requests from your IP. Please try again later.",
-});
 
 const origins = process.env.ORIGIN.split(",");
 
 app.use(express.json());
-app.use(publicLimiter);
+// app.use(publicLimiter);
 app.use(
   cors({
     methods: ["GET", "POST"],
