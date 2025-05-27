@@ -159,7 +159,7 @@ const Tables = () => {
   // Generate table URL for QR code and link display
   const getTableUrl = (tableId: string) => {
     const baseUrl = window.location.origin || "https://your-app-domain.com";
-    const url = `${baseUrl}/table/${tableId}`;
+    const url = `${baseUrl}?table=${tableId}`;
     console.log("Generated QR code URL:", url); // Debug URL
     return url;
   };
@@ -276,7 +276,7 @@ const Tables = () => {
                   >
                     Delete
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outline"
                     size="sm"
                     leftIcon={
@@ -294,7 +294,7 @@ const Tables = () => {
                     }
                   >
                     {likedTables[table.id] ? "Unlike" : "Like"}
-                  </Button>
+                  </Button> */}
                   <Button
                     variant="outline"
                     size="sm"

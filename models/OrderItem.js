@@ -57,8 +57,9 @@ const OrderItem = sequelize.define("OrderItem", {
 });
 
 OrderItem.belongsTo(Varient, { foreignKey: "varientId" });
-OrderItem.belongsTo(Order, { foreignKey: "orderId" });
 Varient.hasMany(OrderItem, { foreignKey: "varientId" });
+
 Order.hasMany(OrderItem, { foreignKey: "orderId" });
+OrderItem.belongsTo(Order, { foreignKey: "orderId" });
 
 export default OrderItem;

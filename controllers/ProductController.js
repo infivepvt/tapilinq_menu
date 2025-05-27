@@ -67,17 +67,6 @@ export const addProduct = asyncHandler(async (req, res) => {
         if (!name && name.toString().trim().length === 0) {
           throw new AppError("Extra items name is required");
         }
-
-        if (
-          price === undefined ||
-          price === null ||
-          isNaN(price) ||
-          parseFloat(price) <= 0
-        ) {
-          throw new AppError(
-            "Extra Items price must be a valid positive number"
-          );
-        }
       }
     }
   }
@@ -119,12 +108,23 @@ export const addProduct = asyncHandler(async (req, res) => {
           fileName = uploadFile(imageFile, "extra-items");
         }
 
+        let newPrice = price;
+
+        if (
+          price === undefined ||
+          price === null ||
+          isNaN(price) ||
+          parseFloat(price) <= 0
+        ) {
+          newPrice = 0;
+        }
+
         await ExtraItem.create({
           varientId: newVarient.id,
           name,
           image: fileName,
           type,
-          price,
+          price: newPrice,
           description,
         });
       }
@@ -259,17 +259,6 @@ export const updateProduct = asyncHandler(async (req, res) => {
         if (!name && name.toString().trim().length === 0) {
           throw new AppError("Extra items name is required");
         }
-
-        if (
-          price === undefined ||
-          price === null ||
-          isNaN(price) ||
-          parseFloat(price) <= 0
-        ) {
-          throw new AppError(
-            "Extra Items price must be a valid positive number"
-          );
-        }
       }
     }
   }
@@ -309,7 +298,10 @@ export const updateProduct = asyncHandler(async (req, res) => {
     await ExtraItem.destroy({ where: { varientId: existsVariants[i].id } });
   }
 
-  await Varient.destroy({ where: { productId } });
+  await Varient.update(
+    { deleted: 1, productId: null, deletedProductId: productId },
+    { where: { productId } }
+  );
 
   for (let i = 0; i < varients.length; i++) {
     let { name, description, price, extraItems } = varients[i];
@@ -340,12 +332,23 @@ export const updateProduct = asyncHandler(async (req, res) => {
           fileName = uploadFile(imageFile, "extra-items");
         }
 
+        let newPrice = price;
+
+        if (
+          price === undefined ||
+          price === null ||
+          isNaN(price) ||
+          parseFloat(price) <= 0
+        ) {
+          newPrice = 0;
+        }
+
         await ExtraItem.create({
           varientId: newVarient.id,
           name,
           image: fileName,
           type,
-          price,
+          price: newPrice,
           description,
         });
       }

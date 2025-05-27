@@ -27,7 +27,7 @@ const ProductCard = ({ product, onClick }: any) => {
     >
       <div className="relative w-1/3 min-w-[120px] h-40 sm:h-48">
         <img
-          src={`${UPLOADS_URL}${product.Images[0].path}`}
+          src={`${UPLOADS_URL}${product.Images[0]?.path}`}
           alt={product.name}
           className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
         />

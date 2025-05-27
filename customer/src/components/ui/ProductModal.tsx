@@ -147,7 +147,7 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
       >
         <div className="relative">
           <img
-            src={`${UPLOADS_URL}${product.Images[0].path}`}
+            src={`${UPLOADS_URL}${product.Images[0]?.path}`}
             alt={product.name}
             className="w-full h-64 object-cover"
           />

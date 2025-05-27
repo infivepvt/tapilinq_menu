@@ -15,6 +15,7 @@ const Varient = sequelize.define("Varient", {
       model: Product,
       key: "id",
     },
+    allowNull: true,
   },
   name: {
     type: DataTypes.STRING,
@@ -35,6 +36,14 @@ const Varient = sequelize.define("Varient", {
   status: {
     type: DataTypes.ENUM("active", "inactive"),
     defaultValue: "active",
+  },
+  deleted: {
+    type: DataTypes.TINYINT,
+    defaultValue: 0,
+  },
+  deletedProductId: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
   },
 });
 

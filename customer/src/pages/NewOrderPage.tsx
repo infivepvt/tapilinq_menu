@@ -38,6 +38,7 @@ const NewOrderPage: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
+        localStorage.removeItem("cart");
         localStorage.setItem("table", table);
         await getTableStatus(table);
         setIsTableOpen(true);
