@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../configs/db.js";
-import Varient from "./Varient.js";
+import Product from "./Products.js";
 
 const ExtraItem = sequelize.define("ExtraItem", {
   id: {
@@ -8,12 +8,13 @@ const ExtraItem = sequelize.define("ExtraItem", {
     primaryKey: true,
     autoIncrement: true,
   },
-  varientId: {
+  productId: {
     type: DataTypes.BIGINT,
     references: {
-      model: Varient,
+      model: Product,
       key: "id",
     },
+    allowNull: true,
   },
   name: {
     type: DataTypes.STRING,
@@ -34,9 +35,17 @@ const ExtraItem = sequelize.define("ExtraItem", {
   description: {
     type: DataTypes.TEXT,
   },
+  deleted: {
+    type: DataTypes.TINYINT,
+    defaultValue: 0,
+  },
+  deletedProductId: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+  },
 });
 
-Varient.hasMany(ExtraItem, { foreignKey: "varientId" });
-ExtraItem.belongsTo(Varient, { foreignKey: "varientId" });
+Product.hasMany(ExtraItem, { foreignKey: "productId" });
+ExtraItem.belongsTo(Product, { foreignKey: "productId" });
 
 export default ExtraItem;

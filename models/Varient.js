@@ -45,6 +45,10 @@ const Varient = sequelize.define("Varient", {
     type: DataTypes.BIGINT,
     allowNull: true,
   },
+  image: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 Product.hasMany(Varient, { foreignKey: "productId" });

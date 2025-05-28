@@ -30,7 +30,7 @@ const NewOrderPage: React.FC = () => {
   const params = new URLSearchParams(location.search);
   const [table] = useState(params.get("table") || null);
   const { getTableStatus } = useGetTableStatus();
-  const [isTableOpen, setIsTableOpen] = useState(true);
+  const [isTableOpen, setIsTableOpen] = useState(false);
   const [reload, setReload] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const codeReaderRef = useRef<BrowserQRCodeReader | null>(null);
@@ -39,11 +39,16 @@ const NewOrderPage: React.FC = () => {
     const load = async () => {
       try {
         localStorage.removeItem("cart");
+        let tblData = localStorage.getItem("table");
         if (table) {
           localStorage.setItem("table", table);
+          await getTableStatus(table);
+          setIsTableOpen(true);
+        } else if (tblData && tblData !== "undefined") {
+          localStorage.setItem("table", tblData);
+          await getTableStatus(tblData);
+          setIsTableOpen(true);
         }
-        await getTableStatus(table);
-        setIsTableOpen(true);
       } catch (error: any) {
         setIsTableOpen(false);
         // toast.error("Table is not open. Please scan the QR code.");
@@ -92,29 +97,33 @@ const NewOrderPage: React.FC = () => {
     }
   }, [activeCategory, searchQuery, reload, isTableOpen]);
 
+  const initializeQR = async () => {
+    codeReaderRef.current = new BrowserQRCodeReader();
+    codeReaderRef.current
+      .decodeFromVideoDevice(null, videoRef.current, (result, error) => {
+        if (result) {
+          handleScan(result.getText());
+        }
+        if (error) {
+          console.error("QR Scan Error:", error);
+        }
+      })
+      .catch((err) => {
+        console.error("QR Scanner Initialization Error:", err);
+        toast.error("Failed to initialize QR scanner.");
+      });
+
+    return () => {
+      if (codeReaderRef.current) {
+        codeReaderRef.current.stopContinuousDecode();
+        codeReaderRef.current = null;
+      }
+    };
+  };
+
   useEffect(() => {
     if (!isTableOpen && videoRef.current) {
-      codeReaderRef.current = new BrowserQRCodeReader();
-      codeReaderRef.current
-        .decodeFromVideoDevice(null, videoRef.current, (result, error) => {
-          if (result) {
-            handleScan(result.getText());
-          }
-          if (error) {
-            console.error("QR Scan Error:", error);
-          }
-        })
-        .catch((err) => {
-          console.error("QR Scanner Initialization Error:", err);
-          toast.error("Failed to initialize QR scanner.");
-        });
-
-      return () => {
-        if (codeReaderRef.current) {
-          codeReaderRef.current.stopContinuousDecode();
-          codeReaderRef.current = null;
-        }
-      };
+      initializeQR();
     }
   }, [isTableOpen]);
 

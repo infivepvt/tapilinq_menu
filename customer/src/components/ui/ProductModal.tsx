@@ -126,7 +126,7 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
   const calculateTotalPrice = () => {
     const extraIngredientsTotal = addedIngredients.reduce(
       (total, ingredient) => {
-        const extraIng = selectedVariant.ExtraItems?.find(
+        const extraIng = product.ExtraItems?.find(
           (ei) => ei.id === ingredient.id
         );
         return total + (extraIng?.price || 0);
@@ -198,14 +198,14 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
             {selectedVariant.description || product.description}
           </p>
 
-          {selectedVariant.ExtraItems.filter((i) => i.type === "remove")
+          {product.ExtraItems.filter((i) => i.type === "remove")
             .length > 0 && (
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mb-6">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
                 Ingredients
               </h3>
               <div className="flex flex-wrap gap-2">
-                {selectedVariant.ExtraItems.filter(
+                {product.ExtraItems.filter(
                   (i) => i.type === "remove"
                 ).map((ingredient: ExtraItem, index: number) => (
                   <div key={index} className="flex items-center">
@@ -240,14 +240,14 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
             </div>
           )}
 
-          {selectedVariant.ExtraItems.filter((i) => i.type === "add").length >
+          {product.ExtraItems.filter((i) => i.type === "add").length >
             0 && (
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mb-6">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
                 Extra Ingredients
               </h3>
               <div className="flex flex-wrap gap-2">
-                {selectedVariant.ExtraItems.filter((i) => i.type === "add").map(
+                {product.ExtraItems.filter((i) => i.type === "add").map(
                   (ingredient: ExtraItem, index: number) => (
                     <button
                       key={index}

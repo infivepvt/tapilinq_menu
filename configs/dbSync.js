@@ -1,6 +1,7 @@
 import Category from "../models/Category.js";
 import ExtraItem from "../models/ExtraItem.js";
 import Image from "../models/Image.js";
+import Migration from "../models/Migration.js";
 import Option from "../models/Options.js";
 import Order from "../models/Order.js";
 import OrderItem from "../models/OrderItem.js";

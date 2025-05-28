@@ -31,9 +31,6 @@ const ProductCard = ({ product, onClick }: any) => {
           alt={product.name}
           className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
         />
-        <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-          Rs.{product.Varients[0].price}
-        </div>
       </div>
 
       <div className="p-3 sm:p-4 flex flex-col justify-between flex-grow w-2/3">
@@ -48,6 +45,9 @@ const ProductCard = ({ product, onClick }: any) => {
           </div>
           <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mb-3 line-clamp-2">
             {product.description}
+          </p>
+          <p className="text-green-600 text-[20px] mb-3 line-clamp-2 font-bold">
+            Rs.{product.Varients[0].price}
           </p>
           {addedProduct && (
             <p className="text-green-600 dark:text-green-300 text-xs sm:text-sm mb-3 line-clamp-2">

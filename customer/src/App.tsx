@@ -13,6 +13,7 @@ import OrderHistoryPage from "./pages/OrderHistoryPage";
 import CartPage from "./pages/CartPage";
 import socket from "./socket";
 import useLoadTax from "./hooks/useLoadTax";
+import ScrollToTop from "./components/ui/ScrollToTop";
 
 function App() {
   useEffect(() => {
@@ -42,6 +43,7 @@ function App() {
       <CartProvider>
         <ChatProvider>
           <Router basename="/">
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<NewOrderPage />} />
               <Route path="/history" element={<OrderHistoryPage />} />

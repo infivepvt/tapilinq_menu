@@ -52,4 +52,15 @@ router.get("/extra-items/:fileName", (req, res) => {
   }
 });
 
+router.get("/varients/:fileName", (req, res) => {
+  const { fileName } = req.params;
+  try {
+    res.sendFile(
+      path.resolve(path.join(__dirname, "..", "uploads/varients", fileName))
+    );
+  } catch (error) {
+    return res.status(404).json({ success: false, error: "Image not found" });
+  }
+});
+
 export default router;

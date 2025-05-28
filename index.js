@@ -31,6 +31,7 @@ app.use(
 // Import routes
 import indexRoutes from "./routes/index.js";
 import StaticRoute from "./routes/StaticRoute.js";
+import { addDefaultDBData } from "./configs/addDefaultData.js";
 
 // Use routes
 app.use("/api", indexRoutes);
@@ -38,26 +39,25 @@ app.use("/uploads", StaticRoute);
 
 //
 
-const staticPath1 = path.join(__dirname, "admin", "dist")
-const staticPath2 = path.join(__dirname, "customer", "dist")
-app.use(express.static(staticPath2))
-app.use(express.static(staticPath1))
+const staticPath1 = path.join(__dirname, "admin", "dist");
+const staticPath2 = path.join(__dirname, "customer", "dist");
+app.use(express.static(staticPath2));
+app.use(express.static(staticPath1));
 
 console.log(staticPath1);
 console.log(staticPath2);
 
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(staticPath1, "index.html"));
+});
 
-app.get("/admin", (req,res)=>{
-  res.sendFile(path.join(staticPath1, "index.html"))
-})
+app.get("/admin/*", (req, res) => {
+  res.sendFile(path.join(staticPath1, "index.html"));
+});
 
-app.get("/admin/*", (req,res)=>{
-  res.sendFile(path.join(staticPath1, "index.html"))
-})
-
-app.get("*", (req,res)=>{
-  res.sendFile(path.join(staticPath2, "index.html"))
-})
+app.get("*", (req, res) => {
+  res.sendFile(path.join(staticPath2, "index.html"));
+});
 
 // Error handling middleware
 app.use(errorHandler);
@@ -66,4 +66,5 @@ server.listen(PORT, async () => {
   logger.info(`Server is running on port ${PORT}`);
   await connectToDatabase();
   await syncDatabase();
+  await addDefaultDBData();
 });

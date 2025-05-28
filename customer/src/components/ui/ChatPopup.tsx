@@ -1,19 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, ShoppingCart } from 'lucide-react';
-import { useChat } from '../../context/ChatContext';
-import { format } from '../../utils/dateUtils';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from "react";
+import { MessageCircle, X, Send, ShoppingCart } from "lucide-react";
+import { useChat } from "../../context/ChatContext";
+import { format } from "../../utils/dateUtils";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useCart } from "../../context/CartContext";
 
 const ChatPopup: React.FC = () => {
   const { messages, addMessage, isOpen, toggleChat } = useChat();
-  const [newMessage, setNewMessage] = useState('');
+  const { totalAmount } = useCart();
+  const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isOpen]);
 
@@ -21,53 +23,66 @@ const ChatPopup: React.FC = () => {
     e.preventDefault();
     if (newMessage.trim()) {
       addMessage(newMessage);
-      setNewMessage('');
+      setNewMessage("");
     }
   };
 
   const handlePlaceOrder = () => {
-    navigate('/cart');
+    navigate("/cart");
   };
 
   return (
     <>
       {/* Chat Button */}
       <button
-        className={`fixed bottom-6 right-6 z-40 p-3 rounded-full shadow-lg transition-all duration-300 ${
-          isOpen 
-            ? 'bg-red-500 hover:bg-red-600 rotate-90' 
-            : 'bg-blue-600 hover:bg-blue-700'
+        className={`fixed bottom-[100px] right-4 z-50 p-4 rounded-full shadow-lg transition-all duration-300 md:bottom-8 md:right-6 ${
+          isOpen
+            ? "bg-red-500 hover:bg-red-600 rotate-90"
+            : "bg-blue-600 hover:bg-blue-700"
         }`}
         onClick={toggleChat}
-        aria-label={isOpen ? 'Close chat' : 'Open chat'}
+        aria-label={isOpen ? "Close chat" : "Open chat"}
       >
-        {isOpen ? <X size={24} className="text-white" /> : <MessageCircle size={24} className="text-white" />}
+        {isOpen ? (
+          <X size={24} className="text-white" />
+        ) : (
+          <MessageCircle size={24} className="text-white" />
+        )}
       </button>
 
       {/* Place Order Button (Visible only on '/' path) */}
-      {location.pathname === '/' && (
+      {location.pathname === "/" && (
         <button
-          className="fixed bottom-6 right-20 z-40 px-6 py-3 rounded-full bg-green-600 hover:bg-green-700 shadow-lg transition-all duration-300 flex items-center space-x-2"
+          className={`
+            fixed z-40 px-6 py-5 rounded-full bg-green-600 hover:bg-green-700 
+            shadow-lg transition-all duration-300 flex items-center justify-center space-x-2
+            bottom-6 left-4 right-4 mx-auto
+            md:bottom-8 md:left-1/2 md:-translate-x-1/2 md:w-64
+          `}
           onClick={handlePlaceOrder}
           aria-label="Place order"
         >
-          <ShoppingCart size={28} className="text-white" />
-          <span className="text-lg font-bold text-white">Place Order</span>
+          <ShoppingCart size={24} className="text-white" />
+          <span className="text-base font-semibold text-white">
+            Place Order {totalAmount > 0 ? `($${totalAmount.toFixed(2)})` : ""}
+          </span>
         </button>
       )}
 
       {/* Chat Window */}
-      <div 
-        className={`fixed bottom-20 right-6 z-40 w-80 md:w-96 bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 ${
-          isOpen 
-            ? 'translate-y-0 opacity-100' 
-            : 'translate-y-8 opacity-0 pointer-events-none'
+      <div
+        className={`fixed bottom-[180px] right-4 z-40 w-80 md:bottom-24 md:right-6 md:w-96 bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 ${
+          isOpen
+            ? "translate-y-0 opacity-100"
+            : "translate-y-8 opacity-0 pointer-events-none"
         }`}
       >
         {/* Chat Header */}
         <div className="bg-blue-600 p-4 text-white">
           <h3 className="font-semibold">Chat with Waiter</h3>
-          <p className="text-xs text-blue-100">We typically reply in a few minutes</p>
+          <p className="text-xs text-blue-100">
+            We typically reply in a few minutes
+          </p>
         </div>
 
         {/* Chat Messages */}
@@ -78,21 +93,27 @@ const ChatPopup: React.FC = () => {
             </div>
           ) : (
             messages.map((msg) => (
-              <div 
-                key={msg.id} 
-                className={`mb-4 flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              <div
+                key={msg.id}
+                className={`mb-4 flex ${
+                  msg.sender === "user" ? "justify-end" : "justify-start"
+                }`}
               >
-                <div 
+                <div
                   className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                    msg.sender === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                    msg.sender === "user"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                   }`}
                 >
                   <p>{msg.message}</p>
-                  <p className={`text-xs mt-1 ${
-                    msg.sender === 'user' ? 'text-blue-200' : 'text-gray-500 dark:text-gray-400'
-                  }`}>
+                  <p
+                    className={`text-xs mt-1 ${
+                      msg.sender === "user"
+                        ? "text-blue-200"
+                        : "text-gray-500 dark:text-gray-400"
+                    }`}
+                  >
                     {format(new Date(msg.timestamp))}
                   </p>
                 </div>
@@ -103,7 +124,10 @@ const ChatPopup: React.FC = () => {
         </div>
 
         {/* Chat Input */}
-        <form onSubmit={handleSubmit} className="border-t border-gray-200 dark:border-gray-700 p-3 flex">
+        <form
+          onSubmit={handleSubmit}
+          className="border-t border-gray-200 dark:border-gray-700 p-3 flex"
+        >
           <input
             type="text"
             value={newMessage}

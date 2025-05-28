@@ -8,6 +8,7 @@ const useAddProduct = () => {
       fData.append("title", formData.name);
       fData.append("description", formData.description);
       fData.append("categoryId", formData.categoryId);
+      fData.append("price", formData.price);
 
       let images = formData.images;
 
@@ -15,34 +16,40 @@ const useAddProduct = () => {
         for (let i = 0; i < images.length; i++) {
           const img = images[i];
           let key = uuidv4();
-          fData.append(`img_${key}`, img);
+          
+          fData.append(`img_`, img);
         }
       }
 
       let varients = formData.variants.map((v: any) => {
-        let extras = v.extraItems.map((et: any) => {
-          let img = et.image;
-          let key = uuidv4();
-          fData.append(key, img);
-
-          return {
-            name: et?.name,
-            key,
-            type: et.isAdded ? "add" : "remove",
-            description: et?.description,
-            price: et?.price,
-          };
-        });
+        let img = v.image;
+        let key = uuidv4();
+        fData.append(key, img);
 
         return {
           name: v?.name,
           description: v?.description,
           price: v?.price,
-          extraItems: extras,
+          key,
+        };
+      });
+
+      let extras = formData.extraItems.map((et: any) => {
+        let img = et.image;
+        let key = uuidv4();
+        fData.append(key, img);
+
+        return {
+          name: et?.name,
+          key,
+          type: et.type === "add" ? "add" : "remove",
+          description: et?.description,
+          price: et?.price,
         };
       });
 
       fData.append("varients", JSON.stringify(varients));
+      fData.append("extraItems", JSON.stringify(extras));
 
       return await api.post("/products", fData, {
         headers: {
