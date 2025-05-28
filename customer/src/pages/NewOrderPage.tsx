@@ -28,7 +28,7 @@ const NewOrderPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
-  const [table] = useState(params.get("table") || "1");
+  const [table] = useState(params.get("table") || null);
   const { getTableStatus } = useGetTableStatus();
   const [isTableOpen, setIsTableOpen] = useState(true);
   const [reload, setReload] = useState(false);
@@ -39,7 +39,9 @@ const NewOrderPage: React.FC = () => {
     const load = async () => {
       try {
         localStorage.removeItem("cart");
-        localStorage.setItem("table", table);
+        if (table) {
+          localStorage.setItem("table", table);
+        }
         await getTableStatus(table);
         setIsTableOpen(true);
       } catch (error: any) {
@@ -137,8 +139,8 @@ const NewOrderPage: React.FC = () => {
   const handleScan = (data: string) => {
     try {
       const url = new URL(data);
-      const orderId = url.searchParams.get("orderId");
-      if (orderId) {
+      const table = url.searchParams.get("table");
+      if (table) {
         window.location.replace(`${url.pathname}?table=${table}`);
         setIsTableOpen(true);
         toast.success("QR code scanned successfully!");
