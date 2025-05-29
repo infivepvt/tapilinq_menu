@@ -1,24 +1,15 @@
 import React from "react";
-import {
-  Clock,
-  CheckCircle,
-  RotateCw,
-  Utensils,
-  XCircle,
-  ChefHat,
-} from "lucide-react";
 
 interface OrderStatusProps {
   status:
     | "pending"
     | "preparing"
-    | "prepairing"
     | "prepared"
     | "served"
     | "completed"
     | "cancelled";
   design?: "default" | "gradient" | "minimal";
-  customText?: string; // New prop for custom status text
+  customText?: string;
 }
 
 const OrderStatus: React.FC<OrderStatusProps> = ({
@@ -31,13 +22,11 @@ const OrderStatus: React.FC<OrderStatusProps> = ({
       case "pending":
         return {
           icon: (
-            <div className="relative w-10 h-10 flex items-center justify-center">
-              <div className="absolute inset-0 border-4 border-orange-200 dark:border-orange-800 rounded-full"></div>
-              <div className="absolute inset-0 border-t-4 border-orange-500 dark:border-orange-400 rounded-full animate-spin"></div>
-              <Clock className="relative text-orange-500 dark:text-orange-400 w-6 h-6" />
+            <div className="relative w-100">
+              <video src="/pending.mp4" autoPlay muted loop></video>
             </div>
           ),
-          text: customText || "Pending", // Use customText if provided
+          text: customText || "Pending",
           bgColor:
             design === "gradient"
               ? "bg-gradient-to-r from-orange-100 to-orange-200 dark:from-orange-900/50 dark:to-orange-800/50"
@@ -45,18 +34,16 @@ const OrderStatus: React.FC<OrderStatusProps> = ({
               ? "bg-transparent border border-orange-300 dark:border-orange-600"
               : "bg-orange-100 dark:bg-orange-900/50",
           textColor: "text-orange-800 dark:text-orange-300",
-          containerClass: "px-4 py-2",
-          animation: design === "minimal" ? "animate-pulse" : "",
+          containerClass: "px-4 py-3",
         };
       case "preparing":
         return {
           icon: (
-            <div className="relative w-10 h-10 flex items-center justify-center">
-              <div className="absolute inset-0 bg-blue-200 dark:bg-blue-800/30 rounded-full animate-ping"></div>
-              <RotateCw className="relative text-blue-500 dark:text-blue-400 w-6 h-6 animate-spin-slow" />
+            <div className="relative w-100">
+              <video src="/preparing.mp4" autoPlay muted loop></video>
             </div>
           ),
-          text: customText || "Preparing",
+          text: "Your foods are getting ready...",
           bgColor:
             design === "gradient"
               ? "bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900/50 dark:to-blue-800/50"
@@ -64,35 +51,37 @@ const OrderStatus: React.FC<OrderStatusProps> = ({
               ? "bg-transparent border border-blue-300 dark:border-blue-600"
               : "bg-blue-100 dark:bg-blue-900/50",
           textColor: "text-blue-800 dark:text-blue-300",
-          containerClass: "px-4 py-2",
-          animation: design === "gradient" ? "animate-pulse-slow" : "",
-        };
-      case "prepairing":
-        return {
-          icon: (
-            <div className="relative w-10 h-10 flex items-center justify-center">
-              <ChefHat className="relative text-indigo-500 dark:text-indigo-400 w-6 h-6 animate-bounce" />
-            </div>
-          ),
-          text: customText || "Prepairing",
-          bgColor:
-            design === "gradient"
-              ? "bg-gradient-to-r from-indigo-100 to-indigo-200 dark:from-indigo-900/50 dark:to-indigo-800/50"
-              : design === "minimal"
-              ? "bg-transparent border border-indigo-300 dark:border-indigo-600"
-              : "bg-indigo-100 dark:bg-indigo-900/50",
-          textColor: "text-indigo-800 dark:text-indigo-300",
-          containerClass: "px-4 py-2",
-          animation: design === "minimal" ? "animate-pulse" : "",
+          containerClass: "px-4 py-3",
         };
       case "prepared":
         return {
           icon: (
-            <div className="relative w-10 h-10 flex items-center justify-center">
-              {design === "gradient" && (
-                <div className="absolute inset-0 bg-purple-200 dark:bg-purple-800/30 rounded-full animate-pulse"></div>
-              )}
-              <Utensils className="relative text-purple-500 dark:text-purple-400 w-6 h-6" />
+            <div className="relative w-12 h-12">
+              <svg viewBox="0 0 24 24" className="w-full h-full">
+                {/* Plate */}
+                <circle
+                  cx="12"
+                  cy="13"
+                  r="8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                {/* Food */}
+                <ellipse cx="12" cy="10" rx="4" ry="2" fill="currentColor" />
+                {/* Checkmark animation */}
+                <path
+                  d="M8 12L11 15L16 9"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeDasharray="20"
+                  strokeDashoffset="20"
+                  className="animate-[drawCheck_0.5s_0.2s_ease-out_forwards]"
+                />
+              </svg>
             </div>
           ),
           text: customText || "Prepared",
@@ -103,17 +92,16 @@ const OrderStatus: React.FC<OrderStatusProps> = ({
               ? "bg-transparent border border-purple-300 dark:border-purple-600"
               : "bg-purple-100 dark:bg-purple-900/50",
           textColor: "text-purple-800 dark:text-purple-300",
-          containerClass: "px-4 py-2",
-          animation: "",
+          containerClass: "px-4 py-3",
         };
       case "served":
         return {
           icon: (
-            <div className="relative w-10 h-10 flex items-center justify-center">
-              <Utensils className="relative text-teal-500 dark:text-teal-400 w-6 h-6 animate-[wiggle_1s_ease-in-out_infinite]" />
+            <div className="relative w-100">
+              <video src="/deliver.mp4" autoPlay muted loop></video>
             </div>
           ),
-          text: customText || "Served",
+          text: "Order delivered..",
           bgColor:
             design === "gradient"
               ? "bg-gradient-to-r from-teal-100 to-teal-200 dark:from-teal-900/50 dark:to-teal-800/50"
@@ -121,17 +109,33 @@ const OrderStatus: React.FC<OrderStatusProps> = ({
               ? "bg-transparent border border-teal-300 dark:border-teal-600"
               : "bg-teal-100 dark:bg-teal-900/50",
           textColor: "text-teal-800 dark:text-teal-300",
-          containerClass: "px-4 py-2",
-          animation: "",
+          containerClass: "px-4 py-3",
         };
       case "completed":
         return {
           icon: (
-            <div className="relative w-10 h-10 flex items-center justify-center">
-              {design === "gradient" && (
-                <div className="absolute inset-0 bg-green-200 dark:bg-green-800/30 rounded-full scale-0 animate-[pop_0.5s_ease-in-out]" />
-              )}
-              <CheckCircle className="relative text-green-500 dark:text-green-400 w-6 h-6" />
+            <div className="relative w-12 h-12">
+              {/* Animated circle */}
+              <div className="absolute inset-0 rounded-full bg-current animate-ping opacity-20" />
+              {/* Checkmark */}
+              <svg viewBox="0 0 24 24" className="w-full h-full">
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M8 12L11 15L16 9"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </div>
           ),
           text: customText || "Completed",
@@ -142,14 +146,43 @@ const OrderStatus: React.FC<OrderStatusProps> = ({
               ? "bg-transparent border border-green-300 dark:border-green-600"
               : "bg-green-100 dark:bg-green-900/50",
           textColor: "text-green-800 dark:text-green-300",
-          containerClass: "px-4 py-2",
-          animation: "",
+          containerClass: "px-4 py-3",
         };
       case "cancelled":
         return {
           icon: (
-            <div className="relative w-10 h-10 flex items-center justify-center">
-              <XCircle className="relative text-red-500 dark:text-red-400 w-6 h-6 animate-[shake_0.5s_ease-in-out]" />
+            <div className="relative w-12 h-12">
+              <svg viewBox="0 0 24 24" className="w-full h-full">
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                {/* Animated X mark */}
+                <path
+                  d="M8 8L16 16"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeDasharray="20"
+                  strokeDashoffset="20"
+                  className="animate-[drawX_0.4s_ease-out_forwards]"
+                />
+                <path
+                  d="M16 8L8 16"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeDasharray="20"
+                  strokeDashoffset="20"
+                  className="animate-[drawX_0.4s_0.2s_ease-out_forwards]"
+                />
+              </svg>
+              {/* Pulsing dot */}
+              <span className="absolute top-1/2 left-1/2 w-1.5 h-1.5 -mt-0.75 -ml-0.75 rounded-full bg-current animate-pulse" />
             </div>
           ),
           text: customText || "Cancelled",
@@ -160,14 +193,32 @@ const OrderStatus: React.FC<OrderStatusProps> = ({
               ? "bg-transparent border border-red-300 dark:border-red-600"
               : "bg-red-100 dark:bg-red-900/50",
           textColor: "text-red-800 dark:text-red-300",
-          containerClass: "px-4 py-2",
-          animation: "",
+          containerClass: "px-4 py-3",
         };
       default:
         return {
           icon: (
-            <div className="relative w-10 h-10 flex items-center justify-center">
-              <Clock className="relative text-gray-500 dark:text-gray-400 w-6 h-6" />
+            <div className="w-12 h-12 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" className="w-full h-full">
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <text
+                  x="12"
+                  y="16"
+                  textAnchor="middle"
+                  fill="currentColor"
+                  fontSize="12"
+                  fontWeight="bold"
+                >
+                  ?
+                </text>
+              </svg>
             </div>
           ),
           text: customText || "Unknown",
@@ -178,8 +229,7 @@ const OrderStatus: React.FC<OrderStatusProps> = ({
               ? "bg-transparent border border-gray-300 dark:border-gray-600"
               : "bg-gray-100 dark:bg-gray-900/50",
           textColor: "text-gray-800 dark:text-gray-300",
-          containerClass: "px-4 py-2",
-          animation: "",
+          containerClass: "px-4 py-3",
         };
     }
   };
@@ -188,12 +238,14 @@ const OrderStatus: React.FC<OrderStatusProps> = ({
 
   return (
     <div
-      className={`inline-flex items-center space-x-3 rounded-full ${config.bgColor} ${config.containerClass} transition-all duration-300 shadow-sm hover:shadow-lg ${config.animation}`}
+      className={`flex flex-col items-center justify-center w-full rounded-lg ${config.bgColor} ${config.containerClass} transition-all duration-300 shadow-sm hover:shadow-lg`}
       role="status"
       aria-label={`Order status: ${config.text}`}
     >
       {config.icon}
-      <span className={`text-base md:text-lg font-medium ${config.textColor}`}>
+      <span
+        className={`text-base md:text-lg font-medium ${config.textColor} mt-2 text-center`}
+      >
         {config.text}
       </span>
     </div>

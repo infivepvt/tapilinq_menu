@@ -78,6 +78,10 @@ const Order = sequelize.define("Order", {
     ),
     defaultValue: "pending",
   },
+  time: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
 });
 
 Order.belongsTo(User, { foreignKey: "waiterId", as: "waiter" });

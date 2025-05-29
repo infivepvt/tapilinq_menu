@@ -183,7 +183,7 @@ const Orders = () => {
   const handleServeOrder = async (orderId) => {
     try {
       const { data } = await serveOrder(orderId);
-      toast.success("Order served");
+      toast.success("Order delivered");
     } catch (error) {
       toast.error(error.message);
     }
@@ -238,10 +238,10 @@ const Orders = () => {
       case "preparing":
         return (
           <button
-            onClick={() => handleCompletePrepare(order.orderId)}
+            onClick={() => handleServeOrder(order.orderId)}
             className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors text-lg font-semibold flex items-center justify-center gap-2"
           >
-            <Check className="h-6 w-6" /> Complete Prepare
+            <Check className="h-6 w-6" /> Deliver Order
           </button>
         );
       case "prepared":
@@ -256,7 +256,13 @@ const Orders = () => {
       case "served":
         return (
           <button
-            onClick={() => handleCompleteOrder(order.orderId)}
+            onClick={() => {
+              if (
+                window.confirm("Are you sure you want to complete this order?")
+              ) {
+                handleCompleteOrder(order.orderId);
+              }
+            }}
             className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors text-lg font-semibold flex items-center justify-center gap-2"
           >
             <Check className="h-6 w-6" /> Complete
@@ -271,7 +277,11 @@ const Orders = () => {
     const isDisabled = order.status === "served";
     return (
       <button
-        onClick={() => handleCancelOrder(order.orderId)}
+        onClick={() => {
+          if (window.confirm("Are you sure you want to cancel this order?")) {
+            handleCancelOrder(order.orderId);
+          }
+        }}
         disabled={isDisabled}
         className={`w-full bg-red-600 text-white py-3 px-4 rounded-lg transition-colors text-lg font-semibold flex items-center justify-center gap-2 ${
           isDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-red-700"

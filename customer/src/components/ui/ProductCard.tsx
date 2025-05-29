@@ -51,7 +51,7 @@ const ProductCard = ({ product, onClick }: any) => {
           </p>
           {addedProduct && (
             <p className="text-green-600 dark:text-green-300 text-xs sm:text-sm mb-3 line-clamp-2">
-              {product.quantity} Item added to order
+              {addedProduct.quantity} Item added to order
             </p>
           )}
         </div>

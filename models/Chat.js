@@ -4,12 +4,12 @@ import User from "./User.js";
 
 const Chat = sequelize.define("Chat", {
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.BIGINT,
     primaryKey: true,
     autoIncrement: true,
   },
   userId: {
-    type: DataTypes.STRING,
+    type: DataTypes.BIGINT,
     references: {
       model: User,
       key: "id",
@@ -24,5 +24,8 @@ const Chat = sequelize.define("Chat", {
     allowNull: true,
   },
 });
+
+User.hasMany(Chat, { foreignKey: "userId" });
+Chat.belongsTo(User, { foreignKey: "userId" });
 
 export default Chat;

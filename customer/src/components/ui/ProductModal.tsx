@@ -55,6 +55,8 @@ interface ProductModalProps {
 const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
+  const [showQuantityConfirmation, setShowQuantityConfirmation] =
+    useState(false);
   const [selectedVariant, setSelectedVariant] = useState<Variant>(
     product.Varients[0] || {}
   );
@@ -67,10 +69,7 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
   const handleAddIngredient = (id: any, ingredient: string, price: any) => {
     let ing = addedIngredients.find((e) => e.id === id);
     if (ing) {
-      setAddedIngredients([
-        ...addedIngredients.filter((i) => i.id !== id),
-        // { id, name: ingredient, price },
-      ]);
+      setAddedIngredients([...addedIngredients.filter((i) => i.id !== id)]);
     } else {
       setAddedIngredients([
         ...addedIngredients,
@@ -83,10 +82,7 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
   const handleRemoveIngredient = (id: any, ingredient: string, price: any) => {
     let ing = removedIngredients.find((e) => e.id === id);
     if (ing) {
-      setRemovedIngredients([
-        ...removedIngredients.filter((i) => i.id !== id),
-        // { id, name: ingredient, price },
-      ]);
+      setRemovedIngredients([...removedIngredients.filter((i) => i.id !== id)]);
     } else {
       setRemovedIngredients([
         ...removedIngredients,
@@ -102,7 +98,31 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
     setRemovedIngredients([]);
   };
 
+  const handleQuantityChange = (value: number) => {
+    const newQuantity = Math.max(1, value);
+    setQuantity(newQuantity);
+    if (newQuantity.toString().length > 2) {
+      setShowQuantityConfirmation(true);
+    } else {
+      setShowQuantityConfirmation(false);
+    }
+  };
+
+  const confirmQuantity = () => {
+    setShowQuantityConfirmation(false); // Just hide confirmation without changing quantity
+  };
+
+  const cancelQuantity = () => {
+    setQuantity(0); // Set quantity to 0 on cancel
+    setShowQuantityConfirmation(false);
+  };
+
   const handleAddToCart = () => {
+    if (quantity.toString().length > 2) {
+      setShowQuantityConfirmation(true);
+      return;
+    }
+
     const cartItem: CartItem = {
       product,
       variant: selectedVariant,
@@ -198,50 +218,49 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
             {selectedVariant.description || product.description}
           </p>
 
-          {product.ExtraItems.filter((i) => i.type === "remove")
-            .length > 0 && (
+          {product.ExtraItems?.filter((i) => i.type === "remove").length >
+            0 && (
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mb-6">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
                 Ingredients
               </h3>
               <div className="flex flex-wrap gap-2">
-                {product.ExtraItems.filter(
-                  (i) => i.type === "remove"
-                ).map((ingredient: ExtraItem, index: number) => (
-                  <div key={index} className="flex items-center">
-                    <button
-                      className={`flex items-center space-x-2 px-3 py-1.5 rounded-full ${
-                        removedIngredients.find(
-                          (i) => i.name === ingredient.name
-                        )
-                          ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 line-through"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                      }`}
-                      onClick={() =>
-                        handleRemoveIngredient(
-                          ingredient.id,
-                          ingredient.name,
-                          ingredient.price
-                        )
-                      }
-                    >
-                      {ingredient.image && (
-                        <img
-                          src={`${UPLOADS_URL}${ingredient.image}`}
-                          alt={ingredient.name}
-                          className="w-6 h-6 rounded-full object-cover"
-                        />
-                      )}
-                      <span>{ingredient.name}</span>
-                    </button>
-                  </div>
-                ))}
+                {product.ExtraItems.filter((i) => i.type === "remove").map(
+                  (ingredient: ExtraItem, index: number) => (
+                    <div key={index} className="flex items-center">
+                      <button
+                        className={`flex items-center space-x-2 px-3 py-1.5 rounded-full ${
+                          removedIngredients.find(
+                            (i) => i.name === ingredient.name
+                          )
+                            ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 line-through"
+                            : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                        }`}
+                        onClick={() =>
+                          handleRemoveIngredient(
+                            ingredient.id,
+                            ingredient.name,
+                            ingredient.price
+                          )
+                        }
+                      >
+                        {ingredient.image && (
+                          <img
+                            src={`${UPLOADS_URL}${ingredient.image}`}
+                            alt={ingredient.name}
+                            className="w-6 h-6 rounded-full object-cover"
+                          />
+                        )}
+                        <span>{ingredient.name}</span>
+                      </button>
+                    </div>
+                  )
+                )}
               </div>
             </div>
           )}
 
-          {product.ExtraItems.filter((i) => i.type === "add").length >
-            0 && (
+          {product.ExtraItems?.filter((i) => i.type === "add").length > 0 && (
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mb-6">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
                 Extra Ingredients
@@ -295,29 +314,58 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
             />
           </div>
 
-          <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6">
-            <div className="flex items-center space-x-4">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6 space-y-4">
+            <div className="flex items-center justify-center space-x-4">
               <button
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                onClick={() => handleQuantityChange(quantity - 1)}
                 aria-label="Decrease quantity"
               >
                 <Minus size={16} />
               </button>
-              <span className="text-xl font-medium text-gray-900 dark:text-white">
-                {quantity}
-              </span>
+              <input
+                type="number"
+                min="1"
+                value={quantity}
+                onChange={(e) =>
+                  handleQuantityChange(parseInt(e.target.value) || 1)
+                }
+                className="w-20 text-center border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Quantity"
+              />
               <button
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                onClick={() => setQuantity((prev) => prev + 1)}
+                onClick={() => handleQuantityChange(quantity + 1)}
                 aria-label="Increase quantity"
               >
                 <Plus size={16} />
               </button>
             </div>
 
+            {showQuantityConfirmation && (
+              <div className="bg-yellow-100 dark:bg-yellow-900/30 p-4 rounded-lg text-center">
+                <p className="text-yellow-800 dark:text-yellow-200 mb-2">
+                  Are you sure you want to order {quantity} items?
+                </p>
+                <div className="flex justify-center gap-4">
+                  <button
+                    className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                    onClick={cancelQuantity}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    onClick={confirmQuantity}
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
+            )}
+
             <button
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors"
+              className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors mt-[50px]"
               onClick={handleAddToCart}
             >
               Add to Order · Rs. {calculateTotalPrice().toFixed(2)}

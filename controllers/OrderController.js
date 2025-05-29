@@ -123,7 +123,8 @@ export const getOrderByOrderId = asyncHandler(async (req, res) => {
 
 export const acceptOrder = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  await Order.update({ status: "preparing" }, { where: { orderId: id } });
+  const { time } = req.body;
+  await Order.update({ status: "preparing", time }, { where: { orderId: id } });
   io.to("customer").emit("changeOrderStatus", {
     orderId: id,
     message: "Your order accepted",

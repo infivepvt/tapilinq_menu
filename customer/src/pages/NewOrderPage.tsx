@@ -28,7 +28,7 @@ const NewOrderPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
-  const [table] = useState(params.get("table") || null);
+  const [table, setTable] = useState(params.get("table") || null);
   const { getTableStatus } = useGetTableStatus();
   const [isTableOpen, setIsTableOpen] = useState(false);
   const [reload, setReload] = useState(false);
@@ -46,12 +46,13 @@ const NewOrderPage: React.FC = () => {
           setIsTableOpen(true);
         } else if (tblData && tblData !== "undefined") {
           localStorage.setItem("table", tblData);
+          setTable(tblData);
           await getTableStatus(tblData);
           setIsTableOpen(true);
         }
       } catch (error: any) {
         setIsTableOpen(false);
-        // toast.error("Table is not open. Please scan the QR code.");
+        toast.error("Table is not open. Please scan the QR code.");
       }
     };
     load();

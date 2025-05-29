@@ -6,6 +6,8 @@ export const app = express();
 export const server = http.createServer(app);
 export const io = new Server(server);
 
+export const customerOrders = [];
+
 io.on("connection", (socket) => {
   socket.on("joinAdmin", () => {
     console.log("admin joined to room");

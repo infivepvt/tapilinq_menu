@@ -136,11 +136,15 @@ export const deleteTable = asyncHandler(async (req, res) => {
 
 export const getTableStatus = asyncHandler(async (req, res) => {
   const { tableId } = req.params;
+  const tbl = await Table.findByPk(tableId);
   const order = await Order.findOne({
     where: { tableId, status: { [Op.in]: ["pending", "prepared"] } },
   });
   if (order) {
     throw new AppError("This table allready booked", 400);
+  }
+  if (!tbl) {
+    throw new AppError("This table not available", 400);
   }
   return res.json({ success: true });
 });

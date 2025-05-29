@@ -1,4 +1,6 @@
 import Category from "../models/Category.js";
+import Chat from "../models/Chat.js";
+import ChatMessage from "../models/ChatMessage.js";
 import ExtraItem from "../models/ExtraItem.js";
 import Image from "../models/Image.js";
 import Migration from "../models/Migration.js";
