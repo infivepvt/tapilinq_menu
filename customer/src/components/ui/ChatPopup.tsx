@@ -10,7 +10,7 @@ import socket from "../../socket";
 
 const ChatPopup: React.FC = () => {
   const { isOpen, toggleChat, setIsOpen } = useChat();
-  const { totalAmount } = useCart();
+  const { totalAmount, subTotal } = useCart();
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -140,7 +140,7 @@ const ChatPopup: React.FC = () => {
         >
           <ShoppingCart size={24} className="text-white" />
           <span className="text-base font-semibold text-white">
-            Place Order {totalAmount > 0 ? `($${totalAmount.toFixed(2)})` : ""}
+            Place Order {subTotal > 0 ? `($${subTotal.toFixed(2)})` : ""}
           </span>
         </button>
       )}
