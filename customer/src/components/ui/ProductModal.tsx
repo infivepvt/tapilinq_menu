@@ -63,6 +63,22 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
   const [addedIngredients, setAddedIngredients] = useState<string[]>([]);
   const [removedIngredients, setRemovedIngredients] = useState<string[]>([]);
   const [specialNote, setSpecialNote] = useState("");
+  const [taxShown, setTaxShown] = useState(true);
+  const [scShown, setScShown] = useState(true);
+  const [sc, setSc] = useState(0);
+  const [tax, setTax] = useState(0);
+
+  useEffect(() => {
+    const taxData = localStorage.getItem("tax") || "0";
+    const showTaxData = localStorage.getItem("showTax") || "true";
+    setTax(parseFloat(taxData));
+    setTaxShown(JSON.parse(showTaxData) === true);
+
+    const scData = localStorage.getItem("sc") || "0";
+    const showscData = localStorage.getItem("scp") || "true";
+    setSc(parseFloat(scData));
+    setScShown(JSON.parse(showscData) === true);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -76,7 +92,6 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
         { id, name: ingredient, price },
       ]);
     }
-    calculateTotalPrice();
   };
 
   const handleRemoveIngredient = (id: any, ingredient: string, price: any) => {
@@ -89,7 +104,6 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
         { id, name: ingredient, price },
       ]);
     }
-    calculateTotalPrice();
   };
 
   const handleVariantChange = (variant: Variant) => {
@@ -153,9 +167,8 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
       },
       0
     );
-    console.log(extraIngredientsTotal);
-    
-    return (selectedVariant.price + extraIngredientsTotal) * quantity;
+
+    return (parseFloat(selectedVariant.price) + extraIngredientsTotal) * quantity;
   };
 
   return (
@@ -365,6 +378,19 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
                 </div>
               </div>
             )}
+
+            <div>
+              {taxShown && (
+                <p>
+                  Tax: <span>{tax}%</span>
+                </p>
+              )}
+              {scShown && (
+                <p>
+                  Service Charge: <span>{sc}%</span>
+                </p>
+              )}
+            </div>
 
             <button
               className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors mt-[50px]"
