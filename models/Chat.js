@@ -8,13 +8,6 @@ const Chat = sequelize.define("Chat", {
     primaryKey: true,
     autoIncrement: true,
   },
-  userId: {
-    type: DataTypes.BIGINT,
-    references: {
-      model: User,
-      key: "id",
-    },
-  },
   username: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -24,8 +17,5 @@ const Chat = sequelize.define("Chat", {
     allowNull: true,
   },
 });
-
-User.hasMany(Chat, { foreignKey: "userId" });
-Chat.belongsTo(User, { foreignKey: "userId" });
 
 export default Chat;

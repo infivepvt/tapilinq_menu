@@ -5,6 +5,8 @@ import CategoryRoute from "./CategoryRoute.js";
 import ProductRoute from "./ProductRoute.js";
 import OrderRoute from "./OrderRoute.js";
 import WaiterRoute from "./WaiterRoute.js";
+import UserRoute from "./UserRoute.js";
+import ChatRoute from "./ChatRoute.js";
 
 const router = express.Router();
 
@@ -14,5 +16,7 @@ router.use("/categories", CategoryRoute);
 router.use("/products", ProductRoute);
 router.use("/orders", OrderRoute);
 router.use("/waiters", WaiterRoute);
+router.use("/users", UserRoute);
+router.use("/chats", ChatRoute);
 
 export default router;

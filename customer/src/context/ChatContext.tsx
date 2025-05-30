@@ -46,7 +46,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       messages, 
       addMessage, 
       isOpen,
-      toggleChat
+      toggleChat,
+      setIsOpen
     }}>
       {children}
     </ChatContext.Provider>

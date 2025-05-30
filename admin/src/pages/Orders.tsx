@@ -100,14 +100,8 @@ const statusStyles = {
 };
 
 const Orders = () => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [orders, setOrders] = useState(initialOrders);
-
-  const filteredOrders = orders.filter((order) =>
-    order.Table.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const [tables, setTables] = useState([]);
   const { getTables } = useGetTables();
@@ -209,19 +203,6 @@ const Orders = () => {
     } catch (error) {
       toast.error(error.message);
     }
-  };
-
-  const updateOrderStatus = (orderId, newStatus) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.orderId === orderId
-          ? { ...order, status: newStatus, isNewOrder: false }
-          : order
-      )
-    );
-    setSelectedOrder((prev) =>
-      prev && prev.orderId === orderId ? { ...prev, status: newStatus } : prev
-    );
   };
 
   const renderActionButton = (order) => {
@@ -364,6 +345,14 @@ const Orders = () => {
                             {formatCurrency(item.price)}
                           </span>
                         </div>
+                        {item.note && (
+                          <div className="mt-5">
+                            <span>
+                              <strong className="text-blue-400">Instructions : </strong>
+                              {item.note}
+                            </span>
+                          </div>
+                        )}
                         {productItem.addedIngredients?.length > 0 && (
                           <ul
                             className={`ml-4 mt-1 text-sm ${

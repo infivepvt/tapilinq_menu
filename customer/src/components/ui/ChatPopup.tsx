@@ -4,26 +4,98 @@ import { useChat } from "../../context/ChatContext";
 import { format } from "../../utils/dateUtils";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
+import useSendMessage from "../../hooks/useSendMessage";
+import useLoadMessages from "../../hooks/useLoadMessages";
+import socket from "../../socket";
 
 const ChatPopup: React.FC = () => {
-  const { messages, addMessage, isOpen, toggleChat } = useChat();
+  const { isOpen, toggleChat, setIsOpen } = useChat();
   const { totalAmount } = useCart();
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const [tableId, setTableId] = useState(null);
+  const [username, setUsername] = useState(null);
+
+  const { loadMessages } = useLoadMessages();
+  const [unreadChats, setUnreadChats] = useState(null);
+
+  useEffect(() => {
+    let tbl = localStorage.getItem("table");
+    setTableId(tbl);
+    let uname = localStorage.getItem("username") || null;
+    setUsername(uname);
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const { data } = await loadMessages(username, tableId);
+        setMessages(data.messages);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    if (tableId && username) load();
+  }, [tableId, username, unreadChats]);
+
+  const { sendMessage } = useSendMessage();
+
+  const [messages, setMessages] = useState([
+    {
+      sender: "cashier",
+      message: "Hello how can i help you today ?",
+      createdAt: new Date(),
+    },
+  ]);
 
   useEffect(() => {
     if (isOpen) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      setUnreadChats(null);
     }
   }, [messages, isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    socket.emit("updateCustomer", { username, tableId });
+  }, [username, tableId, messages]);
+
+  useEffect(() => {
+    socket.on("receivemsg", (data) => {
+      // console.log(data);
+      setUnreadChats(Date.now());
+    });
+
+    return () => {
+      socket.off("receivemsg");
+    };
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newMessage.trim()) {
-      addMessage(newMessage);
+
+    try {
+      const { data } = await sendMessage({
+        message: newMessage,
+        username,
+        tableId,
+      });
+
+      localStorage.setItem("username", data.username);
+      setUsername(data.username);
+
+      setMessages([
+        ...messages,
+        {
+          sender: "user",
+          message: newMessage,
+          createdAt: new Date(),
+        },
+      ]);
       setNewMessage("");
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -47,6 +119,10 @@ const ChatPopup: React.FC = () => {
           <X size={24} className="text-white" />
         ) : (
           <MessageCircle size={24} className="text-white" />
+        )}
+
+        {unreadChats && (
+          <div className="absolute top-0 right-0 w-4 h-4 bg-red-600 rounded-full" />
         )}
       </button>
 
@@ -79,7 +155,7 @@ const ChatPopup: React.FC = () => {
       >
         {/* Chat Header */}
         <div className="bg-blue-600 p-4 text-white">
-          <h3 className="font-semibold">Chat with Waiter</h3>
+          <h3 className="font-semibold">Chat with Cashier</h3>
           <p className="text-xs text-blue-100">
             We typically reply in a few minutes
           </p>
@@ -92,9 +168,9 @@ const ChatPopup: React.FC = () => {
               <p>Send a message to start chatting</p>
             </div>
           ) : (
-            messages.map((msg) => (
+            messages.map((msg, index) => (
               <div
-                key={msg.id}
+                key={index}
                 className={`mb-4 flex ${
                   msg.sender === "user" ? "justify-end" : "justify-start"
                 }`}
@@ -114,7 +190,7 @@ const ChatPopup: React.FC = () => {
                         : "text-gray-500 dark:text-gray-400"
                     }`}
                   >
-                    {format(new Date(msg.timestamp))}
+                    {format(new Date(msg.createdAt))}
                   </p>
                 </div>
               </div>

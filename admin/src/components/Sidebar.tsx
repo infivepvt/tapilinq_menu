@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useAuth } from "../stores/auth";
+import socket from "../socket";
+import { useAuthContext } from "../context/AuthContext";
 
 interface SidebarProps {
   mobile?: boolean;
@@ -24,7 +26,7 @@ interface SidebarProps {
 
 const Sidebar = ({ mobile = false, onClose }: SidebarProps) => {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, unreadChats, setUnreadChats } = useAuthContext();
   const [isOpen, setIsOpen] = useState(true);
 
   const navigation = [
@@ -45,6 +47,17 @@ const Sidebar = ({ mobile = false, onClose }: SidebarProps) => {
   const onToggle = () => {
     setIsOpen(!isOpen);
   };
+
+  useEffect(() => {
+    socket.on("newMessage", (data) => {
+      let newUnreadChats = unreadChats.filter((c) => c !== data.chatId);
+      setUnreadChats([...newUnreadChats, data.chatId]);
+    });
+
+    return () => {
+      socket.off("newMessage");
+    };
+  }, []);
 
   return (
     <div
@@ -110,6 +123,9 @@ const Sidebar = ({ mobile = false, onClose }: SidebarProps) => {
                 />
                 {isOpen && (
                   <span className={cn(!mobile && "ml-3")}>{item.name}</span>
+                )}
+                {isOpen && unreadChats.length > 0 && item.name === "Chat" && (
+                  <div className="w-2 h-2 rounded-full bg-red-600 mx-5"></div>
                 )}
               </Link>
             ))}

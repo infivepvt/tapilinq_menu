@@ -6,7 +6,7 @@ export const app = express();
 export const server = http.createServer(app);
 export const io = new Server(server);
 
-export const customerOrders = [];
+export let onlineCustomers = [];
 
 io.on("connection", (socket) => {
   socket.on("joinAdmin", () => {
@@ -14,9 +14,66 @@ io.on("connection", (socket) => {
     socket.join("admin");
   });
 
-  socket.on("joinCustomer", () => {
-    console.log("Customer joined to room");
+  socket.on("joinCustomer", (data) => {
     socket.join("customer");
+
+    let exists = onlineCustomers.find(
+      (c) =>
+        c.socketId === socket.id ||
+        (c.username === data.username &&
+          parseInt(c.tableId) === parseInt(data.tableId))
+    );
+
+    if (exists) {
+      let newC = onlineCustomers.filter(
+        (oc) => oc.socketId !== exists.socketId
+      );
+      onlineCustomers = [
+        ...newC,
+        {
+          socketId: socket.id,
+          ...data,
+        },
+      ];
+    } else {
+      onlineCustomers.push({
+        socketId: socket.id,
+        ...data,
+      });
+    }
+  });
+
+  socket.on("updateCustomer", (data) => {
+    socket.join("customer");
+
+    let exists = onlineCustomers.find(
+      (c) =>
+        c.socketId === socket.id ||
+        (c.username === data.username &&
+          parseInt(c.tableId) === parseInt(data.tableId))
+    );
+
+    if (exists) {
+      let newC = onlineCustomers.filter(
+        (oc) => oc.socketId !== exists.socketId
+      );
+      onlineCustomers = [
+        ...newC,
+        {
+          socketId: socket.id,
+          ...data,
+        },
+      ];
+    } else {
+      onlineCustomers.push({
+        socketId: socket.id,
+        ...data,
+      });
+    }
+
+    // if (existsIndex !== -1) {
+    //   onlineCustomers.splice(existsIndex, 1);
+    // }
   });
 
   socket.on("newOrder", (data) => {

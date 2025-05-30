@@ -153,7 +153,9 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
       },
       0
     );
-    return selectedVariant.price * quantity + extraIngredientsTotal;
+    console.log(extraIngredientsTotal);
+    
+    return (selectedVariant.price + extraIngredientsTotal) * quantity;
   };
 
   return (

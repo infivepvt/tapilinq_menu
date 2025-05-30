@@ -13,6 +13,8 @@ const CartSummary: React.FC<CartSummaryProps> = ({ onPlaceOrder }) => {
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [taxShown, setTaxShown] = useState(true);
+  const [scShown, setScShown] = useState(true);
+  const [sc, setSc] = useState(0);
   const [tax, setTax] = useState(0);
 
   useEffect(() => {
@@ -20,6 +22,11 @@ const CartSummary: React.FC<CartSummaryProps> = ({ onPlaceOrder }) => {
     const showTaxData = localStorage.getItem("showTax") || "true";
     setTax(parseFloat(taxData));
     setTaxShown(JSON.parse(showTaxData) === true);
+
+    const scData = localStorage.getItem("sc") || "0";
+    const showscData = localStorage.getItem("scp") || "true";
+    setSc(parseFloat(scData));
+    setScShown(JSON.parse(showscData) === true);
   }, []);
 
   const handlePlaceOrder = () => {
@@ -180,6 +187,16 @@ const CartSummary: React.FC<CartSummaryProps> = ({ onPlaceOrder }) => {
             </span>
             <span className="text-gray-800 dark:text-white font-medium">
               {tax.toFixed(2)} %
+            </span>
+          </div>
+        )}
+        {scShown && (
+          <div className="flex justify-between mb-3">
+            <span className="text-gray-600 dark:text-gray-400 font-medium">
+              Service Charge
+            </span>
+            <span className="text-gray-800 dark:text-white font-medium">
+              {sc.toFixed(2)} %
             </span>
           </div>
         )}

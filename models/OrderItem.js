@@ -54,6 +54,10 @@ const OrderItem = sequelize.define("OrderItem", {
     type: DataTypes.TINYINT,
     defaultValue: 0,
   },
+  note: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
 });
 
 OrderItem.belongsTo(Varient, { foreignKey: "varientId" });

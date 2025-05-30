@@ -52,7 +52,7 @@ const NewOrderPage: React.FC = () => {
         }
       } catch (error: any) {
         setIsTableOpen(false);
-        toast.error("Table is not open. Please scan the QR code.");
+        // toast.error("Table is not open. Please scan the QR code.");
       }
     };
     load();
@@ -86,7 +86,7 @@ const NewOrderPage: React.FC = () => {
   useEffect(() => {
     if (isTableOpen) {
       const load = async () => {
-        setFilteredProducts([]);
+        // setFilteredProducts([]);
         try {
           const { data } = await getProducts(activeCategory, searchQuery);
           setFilteredProducts(data.products);
@@ -96,37 +96,37 @@ const NewOrderPage: React.FC = () => {
       };
       load();
     }
-  }, [activeCategory, searchQuery, reload, isTableOpen]);
+  }, [activeCategory, searchQuery, isTableOpen]);
 
-  const initializeQR = async () => {
-    codeReaderRef.current = new BrowserQRCodeReader();
-    codeReaderRef.current
-      .decodeFromVideoDevice(null, videoRef.current, (result, error) => {
-        if (result) {
-          handleScan(result.getText());
-        }
-        if (error) {
-          console.error("QR Scan Error:", error);
-        }
-      })
-      .catch((err) => {
-        console.error("QR Scanner Initialization Error:", err);
-        toast.error("Failed to initialize QR scanner.");
-      });
+  // const initializeQR = async () => {
+  //   codeReaderRef.current = new BrowserQRCodeReader();
+  //   codeReaderRef.current
+  //     .decodeFromVideoDevice(null, videoRef.current, (result, error) => {
+  //       if (result) {
+  //         handleScan(result.getText());
+  //       }
+  //       if (error) {
+  //         console.error("QR Scan Error:", error);
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.error("QR Scanner Initialization Error:", err);
+  //       toast.error("Failed to initialize QR scanner.");
+  //     });
 
-    return () => {
-      if (codeReaderRef.current) {
-        codeReaderRef.current.stopContinuousDecode();
-        codeReaderRef.current = null;
-      }
-    };
-  };
+  //   return () => {
+  //     if (codeReaderRef.current) {
+  //       codeReaderRef.current.stopContinuousDecode();
+  //       codeReaderRef.current = null;
+  //     }
+  //   };
+  // };
 
-  useEffect(() => {
-    if (!isTableOpen && videoRef.current) {
-      initializeQR();
-    }
-  }, [isTableOpen]);
+  // useEffect(() => {
+  //   if (!isTableOpen && videoRef.current) {
+  //     initializeQR();
+  //   }
+  // }, [isTableOpen]);
 
   const handleCategoryChange = (category: string) => {
     setActiveCategory(category);
@@ -146,21 +146,21 @@ const NewOrderPage: React.FC = () => {
     setSelectedProduct(null);
   };
 
-  const handleScan = (data: string) => {
-    try {
-      const url = new URL(data);
-      const table = url.searchParams.get("table");
-      if (table) {
-        window.location.replace(`${url.pathname}?table=${table}`);
-        setIsTableOpen(true);
-        toast.success("QR code scanned successfully!");
-      } else {
-        toast.error("Invalid QR code: No order ID found.");
-      }
-    } catch (error) {
-      toast.error("Invalid QR code URL.");
-    }
-  };
+  // const handleScan = (data: string) => {
+  //   try {
+  //     const url = new URL(data);
+  //     const table = url.searchParams.get("table");
+  //     if (table) {
+  //       window.location.replace(`${url.pathname}?table=${table}`);
+  //       setIsTableOpen(true);
+  //       toast.success("QR code scanned successfully!");
+  //     } else {
+  //       toast.error("Invalid QR code: No order ID found.");
+  //     }
+  //   } catch (error) {
+  //     toast.error("Invalid QR code URL.");
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
@@ -210,14 +210,17 @@ const NewOrderPage: React.FC = () => {
               Scan QR Code
             </h1>
             <div className="max-w-md mx-auto">
-              <video
+              {/* <video
                 ref={videoRef}
                 style={{ width: "100%", maxHeight: "400px" }}
                 muted
                 playsInline
-              />
+              /> */}
+              <h4 className="mt-4 text-gray-500 dark:text-gray-400">
+                This table not available
+              </h4>
               <p className="mt-4 text-gray-500 dark:text-gray-400">
-                Please scan the QR code to access the menu.
+                Please scan the another QR code to access the menu.
               </p>
             </div>
           </div>

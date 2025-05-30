@@ -28,12 +28,6 @@ function App() {
       theme === "dark" ? "dark bg-gray-900" : "bg-gray-50";
   }, [theme]);
 
-  useEffect(() => {
-    // socket.on("connect", () => {
-    socket.emit("joinAdmin");
-    // });
-  }, []);
-
   return (
     <Routes>
       <Route path="/login" element={<Login />} />

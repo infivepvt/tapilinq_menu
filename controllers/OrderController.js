@@ -24,7 +24,11 @@ export const newOrder = asyncHandler(async (req, res) => {
   let taxData = await Option.findByPk(1);
   let taxPercentage = parseFloat(taxData.dataValues.value);
 
+  let scData = await Option.findByPk(3);
+  let scPercentage = parseFloat(scData.dataValues.value);
+
   let taxAmount = (parseFloat(subTotal) / 100) * taxPercentage;
+  let scAmount = (parseFloat(subTotal) / 100) * scPercentage;
 
   const newOrder = await Order.create({
     orderId: orderId,
@@ -32,6 +36,7 @@ export const newOrder = asyncHandler(async (req, res) => {
     tableId: tableNumber,
     total: totalAmount,
     tax: taxAmount,
+    serviceCharge: scAmount,
   });
 
   // Order Items
@@ -63,6 +68,7 @@ export const newOrder = asyncHandler(async (req, res) => {
       total:
         (parseFloat(food.variant.price) + added - removed) *
         parseInt(food.quantity),
+      note: food.specialNote,
     });
   }
 

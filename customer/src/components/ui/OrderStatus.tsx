@@ -23,7 +23,11 @@ const OrderStatus: React.FC<OrderStatusProps> = ({
         return {
           icon: (
             <div className="relative w-100">
-              <video src="/pending.mp4" autoPlay muted loop></video>
+              <img
+                src="/pending.gif"
+                className="w-100 md:w-50 lg:w-25"
+                alt=""
+              />
             </div>
           ),
           text: customText || "Pending",
@@ -40,7 +44,11 @@ const OrderStatus: React.FC<OrderStatusProps> = ({
         return {
           icon: (
             <div className="relative w-100">
-              <video src="/preparing.mp4" autoPlay muted loop></video>
+              <img
+                src="/preparing.gif"
+                className="w-100 md:w-50 lg:w-25"
+                alt=""
+              />
             </div>
           ),
           text: "Your foods are getting ready...",
@@ -98,7 +106,11 @@ const OrderStatus: React.FC<OrderStatusProps> = ({
         return {
           icon: (
             <div className="relative w-100">
-              <video src="/deliver.mp4" autoPlay muted loop></video>
+              <img
+                src="/deliver.gif"
+                className="w-100 md:w-50 lg:w-25"
+                alt=""
+              />
             </div>
           ),
           text: "Order delivered..",

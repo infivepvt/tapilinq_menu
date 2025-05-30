@@ -17,7 +17,11 @@ import ScrollToTop from "./components/ui/ScrollToTop";
 
 function App() {
   useEffect(() => {
-    socket.emit("joinCustomer");
+    socket.on("connect", () => {
+      let username = localStorage.getItem("username") || null;
+      let tableId = localStorage.getItem("table") || null;
+      socket.emit("joinCustomer", { username, tableId });
+    });
   }, []);
 
   const [tax, setTax] = useState(0);
@@ -31,6 +35,8 @@ function App() {
         setTax(parseFloat(data.taxPercentage));
         localStorage.setItem("tax", data.taxPercentage.toString());
         localStorage.setItem("showTax", data.showTax.toString());
+        localStorage.setItem("sc", data.serviceChargePercentage.toString());
+        localStorage.setItem("scp", data.showServiceCharge.toString());
       } catch (error) {
         console.log(error);
       }

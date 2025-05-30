@@ -62,6 +62,11 @@ const Order = sequelize.define("Order", {
     allowNull: false,
     defaultValue: 0,
   },
+  serviceCharge: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+    defaultValue: 0,
+  },
   tax: {
     type: DataTypes.FLOAT,
     allowNull: false,

@@ -50,8 +50,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
     let taxAmount = (totalAmount / 100) * tax;
 
+    const scData = localStorage.getItem("sc") || "0";
+    let sc = parseFloat(scData);
+
+    let scAmount = (totalAmount / 100) * sc;
+
     setSubTotal(Number(totalAmount.toFixed(2)));
-    setTotalAmount(Number((totalAmount + taxAmount).toFixed(2)));
+    setTotalAmount(Number((totalAmount + taxAmount + scAmount).toFixed(2)));
 
     const items = cart.reduce((sum, item) => sum + item.quantity, 0);
     setTotalItems(items);

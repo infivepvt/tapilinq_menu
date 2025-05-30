@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }: any) => {
   const [accessToken, setAccessToken] = useState(getAccessToken());
   const [sessionId, setSessionId] = useState(getSessionId());
   const [loading, setLoading] = useState(true);
+  const [unreadChats, setUnreadChats] = useState([]);
 
   // Sync local state with global state
   const syncAccessToken = (token: any) => {
@@ -74,6 +75,8 @@ export const AuthProvider = ({ children }: any) => {
           api,
           syncAccessToken,
           syncSessionId,
+          unreadChats,
+          setUnreadChats,
         }}
       >
         {children}

@@ -19,6 +19,11 @@ const ChatMessage = sequelize.define("ChatMessage", {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+  sender: {
+    type: DataTypes.ENUM,
+    values: ["user", "cashier"],
+    defaultValue: "user",
+  },
 });
 
 Chat.hasMany(ChatMessage, { foreignKey: "chatId" });

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { Product } from "../../types";
 import { UPLOADS_URL } from "../../api/urls";
+import { useCart } from "../../context/CartContext";
 
 interface ProductCardProps {
   product: Product;
@@ -11,6 +12,8 @@ interface ProductCardProps {
 const ProductCard = ({ product, onClick }: any) => {
   const [addedProduct, setAddedProduct] = useState(null);
 
+  const { subTotal } = useCart();
+
   useEffect(() => {
     let cart = localStorage.getItem("cart") || null;
     if (cart) {
@@ -18,7 +21,7 @@ const ProductCard = ({ product, onClick }: any) => {
       let p = cart?.find((c: any) => c.product.id === product.id);
       setAddedProduct(p);
     }
-  }, []);
+  }, [subTotal]);
 
   return (
     <div

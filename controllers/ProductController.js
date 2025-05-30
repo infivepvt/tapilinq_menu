@@ -522,15 +522,35 @@ export const loadTaxDetails = asyncHandler(async (req, res) => {
   const taxShowData = await Option.findByPk(2);
   const showTax = parseInt(taxShowData.dataValues.value) === 1;
 
-  return res.json({ taxPercentage, showTax });
+  const scAmoData = await Option.findByPk(3);
+  const scPercentage = scAmoData.dataValues.value;
+  const scShowData = await Option.findByPk(4);
+  const showsc = parseInt(scShowData.dataValues.value) === 1;
+
+  return res.json({
+    taxPercentage,
+    showTax,
+    serviceChargePercentage: scPercentage,
+    showServiceCharge: showsc,
+  });
 });
 
 export const saveTax = asyncHandler(async (req, res) => {
-  const { taxPercentage, showTaxDetails } = req.body;
+  const {
+    taxPercentage,
+    showTaxDetails,
+    servicePercentage,
+    showServiceDetails,
+  } = req.body;
   await Option.update({ value: taxPercentage }, { where: { id: 1 } });
   await Option.update(
     { value: showTaxDetails ? "1" : "0" },
     { where: { id: 2 } }
+  );
+  await Option.update({ value: servicePercentage }, { where: { id: 3 } });
+  await Option.update(
+    { value: showServiceDetails ? "1" : "0" },
+    { where: { id: 4 } }
   );
   return res.json({ success: true });
 });

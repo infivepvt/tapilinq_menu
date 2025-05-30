@@ -35,7 +35,6 @@ const CategoryTabs = ({
       const buttonWidth = button.offsetWidth;
       const buttonOffsetLeft = button.offsetLeft;
 
-      // Calculate the scroll position to center the button
       const scrollPosition =
         buttonOffsetLeft - (containerWidth - buttonWidth) / 2;
 
@@ -49,11 +48,11 @@ const CategoryTabs = ({
   return (
     <div
       ref={tabsRef}
-      className={`bg-white dark:bg-gray-900 py-4 transition-all duration-300 ${
+      className={`bg-white dark:bg-gray-900 py-3 transition-all duration-300 ${
         isSticky ? "sticky top-16 z-30 shadow-md animate-slideDown" : ""
       }`}
     >
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-3">
         <div
           ref={scrollContainerRef}
           className="flex overflow-x-auto no-scrollbar space-x-2 pb-2"
@@ -61,7 +60,7 @@ const CategoryTabs = ({
           {categories.map((category: any, index: number) => (
             <button
               key={category.id}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full min-w-[80px] transition-colors sm:px-4 sm:py-2 ${
                 activeCategory === category.name
                   ? "bg-blue-600 text-white shadow-md"
                   : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -77,9 +76,11 @@ const CategoryTabs = ({
                     : ``
                 }
                 alt={category.name}
-                className="w-5 h-5 object-cover rounded-full shrink-0"
+                className="w-4 h-4 object-cover rounded-full shrink-0 sm:w-5 sm:h-5"
               />
-              <span>{category.name}</span>
+              <span className="text-sm truncate sm:text-base">
+                {category.name}
+              </span>
             </button>
           ))}
         </div>
