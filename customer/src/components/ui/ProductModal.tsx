@@ -379,7 +379,7 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
               </div>
             )}
 
-            <div>
+            {/* <div>
               {taxShown && (
                 <p>
                   Tax: <span>{tax}%</span>
@@ -390,7 +390,7 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
                   Service Charge: <span>{sc}%</span>
                 </p>
               )}
-            </div>
+            </div> */}
 
             <button
               className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors mt-[50px]"
