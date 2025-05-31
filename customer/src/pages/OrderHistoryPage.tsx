@@ -162,6 +162,14 @@ const OrderHistoryPage: React.FC = () => {
                           Rs.{order.tax.toFixed(2)}
                         </p>
                       </div>
+                      <div className="flex justify-between items-center mt-2">
+                        <p className="font-semibold text-gray-900 dark:text-white text-[14px]">
+                          Service Charge
+                        </p>
+                        <p className="font-semibold text-blue-600 dark:text-blue-400 text-[14px]">
+                          Rs.{order.serviceCharge.toFixed(2)}
+                        </p>
+                      </div>
                       <div className="flex justify-between items-center mt-3">
                         <p className="font-semibold text-gray-900 dark:text-white">
                           Total

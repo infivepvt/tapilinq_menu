@@ -222,6 +222,10 @@ const NewOrderPage: React.FC = () => {
               <p className="mt-4 text-gray-500 dark:text-gray-400">
                 Please scan the another QR code to access the menu.
               </p>
+              <p className="mt-4 text-gray-500 dark:text-gray-400">Or</p>
+              <button onClick={()=>navigate("/history")} className="mt-5 bg-green-600 hover:bg-green-700 text-white font-semibold h-12 px-6 rounded-md shadow-md transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                Show your orders
+              </button>
             </div>
           </div>
         )}

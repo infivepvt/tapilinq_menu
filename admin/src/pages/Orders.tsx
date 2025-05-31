@@ -115,9 +115,20 @@ const Orders = () => {
   };
 
   const sortedTables = [...tables].sort((a, b) => {
-    const statusA = a.Orders[0]?.status ?? "noOrders";
-    const statusB = b.Orders[0]?.status ?? "noOrders";
-    return statusPriority[statusA] - statusPriority[statusB];
+    const orderA = a.Orders[0];
+    const orderB = b.Orders[0];
+
+    const statusA = orderA?.status ?? "noOrders";
+    const statusB = orderB?.status ?? "noOrders";
+
+    const priorityDiff = statusPriority[statusA] - statusPriority[statusB];
+
+    if (priorityDiff !== 0) return priorityDiff;
+
+    const dateA = new Date(orderA?.updatedAt ?? 0);
+    const dateB = new Date(orderB?.updatedAt ?? 0);
+
+    return dateA - dateB; // older orders first
   });
 
   useEffect(() => {
@@ -348,7 +359,9 @@ const Orders = () => {
                         {item.note && (
                           <div className="mt-5">
                             <span>
-                              <strong className="text-blue-400">Instructions : </strong>
+                              <strong className="text-blue-400">
+                                Instructions :{" "}
+                              </strong>
                               {item.note}
                             </span>
                           </div>
