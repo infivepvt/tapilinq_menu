@@ -18,7 +18,7 @@ export const addTable = asyncHandler(async (req, res) => {
   }
 
   if (imageFile) {
-    imagePath = uploadFile(imageFile, "tables");
+    imagePath = await uploadFile(imageFile, "tables");
   }
 
   await Table.create({
@@ -89,7 +89,7 @@ export const updateTable = asyncHandler(async (req, res) => {
   if (files && files.length > 0) {
     const imageFile = files[0];
     deleteFile(imagePath);
-    imagePath = uploadFile(imageFile, "tables");
+    imagePath = await uploadFile(imageFile, "tables");
   }
 
   await table.update({

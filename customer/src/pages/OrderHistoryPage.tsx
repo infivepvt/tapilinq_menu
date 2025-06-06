@@ -13,6 +13,9 @@ const OrderHistoryPage: React.FC = () => {
 
   const { getOrders } = useGetOrders();
 
+  console.log(pastOrders);
+  
+
   useEffect(() => {
     const load = async () => {
       let o = localStorage.getItem("orders");
@@ -137,9 +140,9 @@ const OrderHistoryPage: React.FC = () => {
                                     </div>
                                   )}
 
-                                  {item.specialNote && (
-                                    <div className="mt-1 italic">
-                                      "{item.specialNote}"
+                                  {item.note && (
+                                    <div className="mt-1 italic text-blue-300">
+                                      "{item.note}"
                                     </div>
                                   )}
                                 </div>

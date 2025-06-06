@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { X, Minus, Plus } from "lucide-react";
+import { X, Minus, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { UPLOADS_URL } from "../../api/urls";
-import useLoadTax from "../../hooks/useLoadTax";
 
 // Define TypeScript interfaces for type safety
 interface ExtraItem {
@@ -67,6 +66,7 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
   const [scShown, setScShown] = useState(true);
   const [sc, setSc] = useState(0);
   const [tax, setTax] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     const taxData = localStorage.getItem("tax") || "0";
@@ -123,11 +123,11 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
   };
 
   const confirmQuantity = () => {
-    setShowQuantityConfirmation(false); // Just hide confirmation without changing quantity
+    setShowQuantityConfirmation(false);
   };
 
   const cancelQuantity = () => {
-    setQuantity(0); // Set quantity to 0 on cancel
+    setQuantity(0);
     setShowQuantityConfirmation(false);
   };
 
@@ -155,6 +155,7 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
     setAddedIngredients([]);
     setRemovedIngredients([]);
     setSpecialNote("");
+    setCurrentImageIndex(0);
   };
 
   const calculateTotalPrice = () => {
@@ -171,6 +172,19 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
     return (parseFloat(selectedVariant.price) + extraIngredientsTotal) * quantity;
   };
 
+  // Carousel navigation handlers
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => 
+      prev === 0 ? product.Images.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => 
+      prev === product.Images.length - 1 ? 0 : prev + 1
+    );
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto"
@@ -181,20 +195,62 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative">
-          <img
-            src={`${UPLOADS_URL}${product.Images[0]?.path}`}
-            alt={product.name}
-            className="w-full h-64 object-cover"
-          />
-          <button
-            className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-gray-900/80 rounded-full text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition-colors"
-            onClick={onClose}
-            aria-label="Close modal"
-          >
-            <X size={20} />
-          </button>
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
-            <h2 className="text-white text-2xl font-bold">{product.name}</h2>
+          <div className="relative w-full h-64">
+            {product.Images && product.Images.length > 0 ? (
+              <>
+                <img
+                  src={`${UPLOADS_URL}${product.Images[currentImageIndex]?.path}`}
+                  alt={`${product.name} - Image ${currentImageIndex + 1}`}
+                  className="w-full h-64 object-cover"
+                />
+                {product.Images.length > 1 && (
+                  <>
+                    <button
+                      className="absolute top-1/2 left-4 transform -translate-y-1/2 p-2 bg-white/80 dark:bg-gray-900/80 rounded-full text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition-all"
+                      onClick={handlePrevImage}
+                      aria-label="Previous image"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    <button
+                      className="absolute top-1/2 right-4 transform -translate-y-1/2 p-2 bg-white/80 dark:bg-gray-900/80 rounded-full text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition-all"
+                      onClick={handleNextImage}
+                      aria-label="Next image"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                      {product.Images.map((_, index) => (
+                        <button
+                          key={index}
+                          className={`w-2 h-2 rounded-full ${
+                            currentImageIndex === index
+                              ? "bg-white"
+                              : "bg-white/50"
+                          }`}
+                          onClick={() => setCurrentImageIndex(index)}
+                          aria-label={`Go to image ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <div className="w-full h-64 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                <span className="text-gray-500 dark:text-gray-400">No Image Available</span>
+              </div>
+            )}
+            <button
+              className="absolute top-4 right-4 p-2 bg-white/80 dark:bg-gray-900/80 rounded-full text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition-colors"
+              onClick={onClose}
+              aria-label="Close modal"
+            >
+              <X size={20} />
+            </button>
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
+              <h2 className="text-white text-2xl font-bold">{product.name}</h2>
+            </div>
           </div>
         </div>
 
@@ -237,7 +293,7 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
             0 && (
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mb-6">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
-                Ingredients
+                Exclude Ingredients
               </h3>
               <div className="flex flex-wrap gap-2">
                 {product.ExtraItems.filter((i) => i.type === "remove").map(
@@ -278,7 +334,7 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
           {product.ExtraItems?.filter((i) => i.type === "add").length > 0 && (
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mb-6">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
-                Extra Ingredients
+                Add something extra
               </h3>
               <div className="flex flex-wrap gap-2">
                 {product.ExtraItems.filter((i) => i.type === "add").map(
@@ -378,19 +434,6 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
                 </div>
               </div>
             )}
-
-            {/* <div>
-              {taxShown && (
-                <p>
-                  Tax: <span>{tax}%</span>
-                </p>
-              )}
-              {scShown && (
-                <p>
-                  Service Charge: <span>{sc}%</span>
-                </p>
-              )}
-            </div> */}
 
             <button
               className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors mt-[50px]"

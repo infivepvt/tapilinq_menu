@@ -3,14 +3,18 @@ import { v4 as uuidv4 } from "uuid";
 
 const useUpdateProduct = () => {
   const updateProduct = async (formData: any, productId: any) => {
-    try {
-      console.log(formData);
+    console.log(formData);
 
+    try {
       const fData = new FormData();
       fData.append("title", formData.name);
       fData.append("description", formData.description);
       fData.append("categoryId", formData.categoryId);
       fData.append("price", formData.price);
+      fData.append("useTimePeriod", formData.useTimePeriod);
+      fData.append("availableFrom", formData.availableFrom);
+      fData.append("availableTo", formData.availableTo);
+      fData.append("status", formData.status);
 
       let images = formData.images;
 
@@ -19,9 +23,9 @@ const useUpdateProduct = () => {
           const img = images[i];
           let key = uuidv4();
           if (img instanceof File) {
-            fData.append(`img_`, img);
+            fData.append(`img_${key}`, img);
           } else {
-            fData.append(`img_`, img.path);
+            fData.append(`img_${key}`, img);
           }
         }
       }

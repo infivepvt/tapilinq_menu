@@ -16,7 +16,7 @@ export const addCategory = asyncHandler(async (req, res) => {
   }
 
   if (imageFile) {
-    imagePath = uploadFile(imageFile, "categories");
+    imagePath = await uploadFile(imageFile, "categories");
   }
 
   await Category.create({
@@ -83,7 +83,7 @@ export const updateCategory = asyncHandler(async (req, res) => {
 
   if (imageFile) {
     deleteFile(imagePath);
-    imagePath = uploadFile(imageFile, "categories");
+    imagePath = await uploadFile(imageFile, "categories");
   }
 
   await category.update({

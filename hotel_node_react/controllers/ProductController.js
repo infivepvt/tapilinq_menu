@@ -90,7 +90,7 @@ export const addProduct = asyncHandler(async (req, res) => {
 
   for (let i = 0; i < productImageFiles.length; i++) {
     const img = productImageFiles[i];
-    const fileName = uploadFile(img, "products");
+    const fileName = await uploadFile(img, "products");
     await Image.create({
       productId: newProduct.id,
       path: fileName,
@@ -116,7 +116,7 @@ export const addProduct = asyncHandler(async (req, res) => {
         let imageFile = files.find((f) => f.fieldname === key);
 
         if (imageFile) {
-          fileName = uploadFile(imageFile, "extra-items");
+          fileName = await uploadFile(imageFile, "extra-items");
         }
 
         await ExtraItem.create({
@@ -288,7 +288,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
 
   for (let i = 0; i < productImageFiles.length; i++) {
     const img = productImageFiles[i];
-    const fileName = uploadFile(img, "products");
+    const fileName = await uploadFile(img, "products");
     await Image.create({
       productId,
       path: fileName,
@@ -337,7 +337,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
         }
 
         if (imageFile) {
-          fileName = uploadFile(imageFile, "extra-items");
+          fileName = await uploadFile(imageFile, "extra-items");
         }
 
         await ExtraItem.create({

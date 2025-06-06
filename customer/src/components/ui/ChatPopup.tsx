@@ -140,7 +140,7 @@ const ChatPopup: React.FC = () => {
         >
           <ShoppingCart size={24} className="text-white" />
           <span className="text-base font-semibold text-white">
-            Place Order {subTotal > 0 ? `($${subTotal.toFixed(2)})` : ""}
+            Place Order {subTotal > 0 ? `(Rs.${subTotal.toFixed(2)})` : ""}
           </span>
         </button>
       )}

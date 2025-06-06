@@ -16,8 +16,18 @@ import {
 import Option from "../models/Options.js";
 
 export const addProduct = asyncHandler(async (req, res) => {
-  let { title, description, categoryId, varients, extraItems, price } =
-    req.body;
+  let {
+    title,
+    description,
+    categoryId,
+    varients,
+    extraItems,
+    price,
+    status,
+    availableTo,
+    availableFrom,
+    useTimePeriod,
+  } = req.body;
   const files = req.files;
 
   varients = JSON.parse(varients || "[]");
@@ -82,11 +92,15 @@ export const addProduct = asyncHandler(async (req, res) => {
     name: title,
     description,
     categoryId,
+    status,
+    from: availableFrom,
+    to: availableTo,
+    timePeriod: useTimePeriod ? 1 : 0,
   });
 
   for (let i = 0; i < productImageFiles.length; i++) {
     const img = productImageFiles[i];
-    const fileName = uploadFile(img, "products");
+    const fileName = await uploadFile(img, "products");
     await Image.create({
       productId: newProduct.id,
       path: fileName,
@@ -110,7 +124,7 @@ export const addProduct = asyncHandler(async (req, res) => {
     let imageFile = files.find((f) => f.fieldname === key);
 
     if (imageFile) {
-      fileName = uploadFile(imageFile, "varients");
+      fileName = await uploadFile(imageFile, "varients");
     }
 
     let newPrice = price;
@@ -141,7 +155,7 @@ export const addProduct = asyncHandler(async (req, res) => {
     let imageFile = files.find((f) => f.fieldname === key);
 
     if (imageFile) {
-      fileName = uploadFile(imageFile, "extra-items");
+      fileName = await uploadFile(imageFile, "extra-items");
     }
 
     let newPrice = price;
@@ -241,8 +255,18 @@ export const getProducts = asyncHandler(async (req, res) => {
 });
 
 export const updateProduct = asyncHandler(async (req, res) => {
-  let { title, description, categoryId, varients, extraItems, price } =
-    req.body;
+  let {
+    title,
+    description,
+    categoryId,
+    varients,
+    extraItems,
+    price,
+    status,
+    availableTo,
+    availableFrom,
+    useTimePeriod,
+  } = req.body;
   const files = req.files;
   const { productId } = req.params;
 
@@ -275,13 +299,23 @@ export const updateProduct = asyncHandler(async (req, res) => {
     throw new AppError("Product price must be a valid positive number");
   }
 
+  const existProductImages = Object.entries(req.body)
+    .filter(([key]) => key.startsWith("img"))
+    .map(([, value]) => {
+      const index = value.indexOf("uploads/");
+      return index !== -1 ? value.slice(index) : null;
+    })
+    .filter(Boolean); // removes nulls
+
   const productImageFiles = files.filter((f) => f.fieldname.startsWith("img"));
 
   const singleImage = req.body.img_;
   console.log(singleImage);
 
-  if (!singleImage && (!productImageFiles || productImageFiles.length === 0)) {
-    throw new AppError("Product image is required");
+  let imgLen = existProductImages.length + productImageFiles.length;
+
+  if (imgLen === 0) {
+    throw new AppError("Minimum 1 product image is required");
   }
 
   for (let i = 0; i < varients.length; i++) {
@@ -317,36 +351,66 @@ export const updateProduct = asyncHandler(async (req, res) => {
     name: title,
     description,
     categoryId,
+    status,
+    from: availableFrom,
+    to: availableTo,
+    timePeriod: useTimePeriod ? 1 : 0,
   });
 
   // DELETE PRODUCT IMAGES
 
-  const productImages = await Image.findAll({ where: { productId } });
+  // Save all img in temp
+  let newArr = [...existProductImages, ...productImageFiles];
+  let tempImgs = [];
 
-  for (let i = 0; i < productImages.length; i++) {
-    if (productImages[i]?.path && productImages[i]?.path !== singleImage)
-      deleteFile(productImages[i].path);
+  console.log(newArr);
+
+  for (let i = 0; i < newArr.length; i++) {
+    let img = newArr[i];
+    if (img?.buffer) {
+      try {
+        let fName = await uploadFile(img, "temp");
+        tempImgs.push(fName);
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      moveToCache(img);
+      tempImgs.push(img);
+    }
   }
+
+  console.log("ttt", tempImgs);
 
   await Image.destroy({ where: { productId } });
 
-  if (singleImage) {
+  const updatedArr = tempImgs.map((str) =>
+    str.includes("temp") ? str.replace(/temp/g, "products") : str
+  );
+
+  console.log(updatedArr);
+
+  for (let i = 0; i < updatedArr.length; i++) {
+    let tmp = updatedArr[i];
+
+    moveFromCache(tmp);
+
     await Image.create({
       productId,
-      path: singleImage,
+      path: tmp,
     });
   }
 
   // DELETE PRODUCT IMAGES
 
-  for (let i = 0; i < productImageFiles.length; i++) {
-    const img = productImageFiles[i];
-    const fileName = uploadFile(img, "products");
-    await Image.create({
-      productId,
-      path: fileName,
-    });
-  }
+  // for (let i = 0; i < productImageFiles.length; i++) {
+  //   const img = productImageFiles[i];
+  //   const fileName = await uploadFile(img, "products");
+  //   await Image.create({
+  //     productId,
+  //     path: fileName,
+  //   });
+  // }
 
   // DISABLE VARIENTS
 
@@ -375,10 +439,12 @@ export const updateProduct = asyncHandler(async (req, res) => {
 
     let fileName = null;
 
-    let imageFile = files.find((f) => f.fieldname === key);
+    let imageFile = files.find((f) => f.fieldname === key) || req.body[key];
 
-    if (imageFile) {
-      fileName = uploadFile(imageFile, "varients");
+    if (imageFile?.buffer) {
+      fileName = await uploadFile(imageFile, "varients");
+    } else {
+      fileName = imageFile;
     }
 
     let newPrice = price;
@@ -419,10 +485,12 @@ export const updateProduct = asyncHandler(async (req, res) => {
 
     let fileName = null;
 
-    let imageFile = files.find((f) => f.fieldname === key);
+    let imageFile = files.find((f) => f.fieldname === key) || req.body[key];
 
-    if (imageFile) {
-      fileName = uploadFile(imageFile, "extra-items");
+    if (imageFile?.buffer) {
+      fileName = await uploadFile(imageFile, "extra-items");
+    } else {
+      fileName = imageFile;
     }
 
     let newPrice = price;

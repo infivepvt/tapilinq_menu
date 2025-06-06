@@ -27,6 +27,18 @@ const Product = sequelize.define("Product", {
     type: DataTypes.ENUM("active", "inactive"),
     defaultValue: "active",
   },
+  timePeriod: {
+    type: DataTypes.TINYINT,
+    defaultValue: 0,
+  },
+  from: {
+    type: DataTypes.TIME,
+    allowNull: true,
+  },
+  to: {
+    type: DataTypes.TIME,
+    allowNull: true,
+  },
 });
 
 Category.hasMany(Product, { foreignKey: "categoryId" });

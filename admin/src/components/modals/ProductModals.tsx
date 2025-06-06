@@ -46,15 +46,19 @@ interface Product {
   description: string;
   categoryId: string;
   price: number;
-  images: File[];
+  images: (File | string)[];
   variants: Variant[];
   extraItems: ExtraItem[];
   useVariants: boolean;
   useExtraItems: boolean;
+  useTimePeriod: boolean;
+  availableFrom: string;
+  availableTo: string;
+  isActive: boolean;
 }
 
 interface ImagePreviews {
-  product: string | null;
+  product: (string | null)[];
   variants: Record<number, string | null>;
   extraItems: { temp: string | null };
 }
@@ -112,6 +116,10 @@ const ProductModals = ({
     extraItems: [],
     useVariants: false,
     useExtraItems: false,
+    useTimePeriod: false,
+    availableFrom: "",
+    availableTo: "",
+    isActive: true,
   };
 
   const [formData, setFormData] = useState<Product>(product || initialProduct);
@@ -141,7 +149,7 @@ const ProductModals = ({
     Record<number, boolean>
   >({});
   const [imagePreviews, setImagePreviews] = useState<ImagePreviews>({
-    product: null,
+    product: [],
     variants: {},
     extraItems: { temp: null },
   });
@@ -163,19 +171,22 @@ const ProductModals = ({
           image: v.image || null,
           isDefault: index === 0,
         })) || [];
-      const image = product.Images?.[0]
-        ? `${UPLOADS_URL}${product.Images[0].path}`
-        : null;
+      const images =
+        product.Images?.map((img: any) => `${UPLOADS_URL}${img.path}`) || [];
       setFormData({
         ...product,
         variants,
         extraItems: product.ExtraItems || [],
-        images: product.Images || [],
+        images,
         useVariants: product.Varients.length > 0 || false,
         useExtraItems: product.ExtraItems.length > 0 || false,
+        useTimePeriod: parseInt(product.timePeriod) === 1,
+        availableFrom: product.from || "",
+        availableTo: product.to || "",
+        isActive: product.isActive !== undefined ? product.isActive : true,
       });
       setImagePreviews({
-        product: image,
+        product: images,
         variants: variants.reduce((acc, v, i) => {
           if (v.image) acc[i] = `${UPLOADS_URL}${v.image}`;
           return acc;
@@ -188,7 +199,7 @@ const ProductModals = ({
   // Cleanup image previews
   useEffect(() => {
     return () => {
-      if (imagePreviews.product) URL.revokeObjectURL(imagePreviews.product);
+      imagePreviews.product.forEach((url) => url && URL.revokeObjectURL(url));
       Object.values(imagePreviews.variants).forEach(
         (url) => url && URL.revokeObjectURL(url)
       );
@@ -210,20 +221,33 @@ const ProductModals = ({
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (imagePreviews.product) URL.revokeObjectURL(imagePreviews.product);
-      const previewUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, images: [file] }));
-      setImagePreviews((prev) => ({ ...prev, product: previewUrl }));
+    const files = Array.from(e.target.files || []);
+    if (files.length) {
+      const newImages = files.map((file) => file);
+      const newPreviews = files.map((file) => URL.createObjectURL(file));
+      setFormData((prev) => ({
+        ...prev,
+        images: [...prev.images, ...newImages],
+      }));
+      setImagePreviews((prev) => ({
+        ...prev,
+        product: [...prev.product, ...newPreviews],
+      }));
       e.target.value = "";
     }
   };
 
-  const removeProductImage = () => {
-    if (imagePreviews.product) URL.revokeObjectURL(imagePreviews.product);
-    setFormData((prev) => ({ ...prev, images: [] }));
-    setImagePreviews((prev) => ({ ...prev, product: null }));
+  const removeProductImage = (index: number) => {
+    if (imagePreviews.product[index])
+      URL.revokeObjectURL(imagePreviews.product[index]);
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
+    setImagePreviews((prev) => ({
+      ...prev,
+      product: prev.product.filter((_, i) => i !== index),
+    }));
   };
 
   const handleVariantInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -429,7 +453,7 @@ const ProductModals = ({
   const clearData = () => {
     setFormData(initialProduct);
     setImagePreviews({
-      product: null,
+      product: [],
       variants: {},
       extraItems: { temp: null },
     });
@@ -438,12 +462,21 @@ const ProductModals = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Validate time inputs if time period is enabled
+      if (
+        formData.useTimePeriod &&
+        (!formData.availableFrom || !formData.availableTo)
+      ) {
+        throw new Error(
+          "Please provide both 'From' and 'To' times when time period is enabled"
+        );
+      }
       if (isEdit) {
         await updateProduct(formData, product.id);
         toast.success("Product updated successfully");
       } else {
         await addProduct(formData);
-        toast.success("Product updated successfully");
+        toast.success("Product added successfully");
       }
       clearData();
       onClose();
@@ -541,35 +574,35 @@ const ProductModals = ({
                 )}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Product Image
+                    Product Images
                   </label>
-                  <div className="flex items-center gap-4 mt-1">
-                    {imagePreviews.product ? (
-                      <div className="relative">
+                  <div className="flex flex-wrap items-center gap-4 mt-1">
+                    {imagePreviews.product.map((preview, index) => (
+                      <div key={index} className="relative">
                         <img
-                          src={imagePreviews.product}
-                          alt="Product preview"
+                          src={preview}
+                          alt={`Product preview ${index + 1}`}
                           className="h-20 w-20 object-cover rounded-md border"
                         />
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={removeProductImage}
+                          onClick={() => removeProductImage(index)}
                           className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
                         >
                           <X className="h-3 w-3" />
                         </Button>
                       </div>
-                    ) : (
-                      <div className="h-20 w-20 flex items-center justify-center rounded-md border-2 border-dashed bg-gray-100 dark:bg-gray-600">
-                        <ImageIcon className="h-6 w-6 text-gray-400 dark:text-gray-300" />
-                      </div>
-                    )}
+                    ))}
+                    <div className="h-20 w-20 flex items-center justify-center rounded-md border-2 border-dashed bg-gray-100 dark:bg-gray-600">
+                      <ImageIcon className="h-6 w-6 text-gray-400 dark:text-gray-300" />
+                    </div>
                     <label className="cursor-pointer">
                       <input
                         type="file"
                         accept="image/*"
+                        multiple
                         onChange={handleImageChange}
                         className="hidden"
                         id="product-img"
@@ -583,12 +616,88 @@ const ProductModals = ({
                         }
                         className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                       >
-                        {imagePreviews.product
-                          ? "Change Image"
-                          : "Upload Image"}
+                        Upload Images
                       </Button>
                     </label>
                   </div>
+                </div>
+                {/* Active/Inactive Toggle */}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="isActive"
+                    checked={formData.isActive}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        isActive: e.target.checked,
+                      }))
+                    }
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label
+                    htmlFor="isActive"
+                    className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    Product Active
+                  </label>
+                </div>
+                {/* Time Period Toggle and Inputs */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="useTimePeriod"
+                      checked={formData.useTimePeriod}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          useTimePeriod: e.target.checked,
+                          availableFrom: e.target.checked
+                            ? prev.availableFrom
+                            : "",
+                          availableTo: e.target.checked ? prev.availableTo : "",
+                        }))
+                      }
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label
+                      htmlFor="useTimePeriod"
+                      className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      Set Available Time Period
+                    </label>
+                  </div>
+                  {formData.useTimePeriod && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Available From <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          type="time"
+                          name="availableFrom"
+                          value={formData.availableFrom}
+                          onChange={handleInputChange}
+                          required
+                          className="mt-1 dark:bg-gray-600 dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Available To <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          type="time"
+                          name="availableTo"
+                          value={formData.availableTo}
+                          onChange={handleInputChange}
+                          required
+                          className="mt-1 dark:bg-gray-600 dark:text-white"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </section>
@@ -1117,7 +1226,9 @@ const ProductModals = ({
                   !formData.name ||
                   !formData.categoryId ||
                   (formData.useVariants && formData.variants.length === 0) ||
-                  (!formData.useVariants && !formData.price)
+                  (!formData.useVariants && !formData.price) ||
+                  (formData.useTimePeriod &&
+                    (!formData.availableFrom || !formData.availableTo))
                 }
                 className="bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
               >

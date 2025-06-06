@@ -9,6 +9,10 @@ const useAddProduct = () => {
       fData.append("description", formData.description);
       fData.append("categoryId", formData.categoryId);
       fData.append("price", formData.price);
+      fData.append("useTimePeriod", formData.useTimePeriod);
+      fData.append("availableFrom", formData.availableFrom);
+      fData.append("availableTo", formData.availableTo);
+      fData.append("status", formData.status);
 
       let images = formData.images;
 
@@ -16,7 +20,7 @@ const useAddProduct = () => {
         for (let i = 0; i < images.length; i++) {
           const img = images[i];
           let key = uuidv4();
-          
+
           fData.append(`img_`, img);
         }
       }
