@@ -12,7 +12,7 @@ const useAddProduct = () => {
       fData.append("useTimePeriod", formData.useTimePeriod);
       fData.append("availableFrom", formData.availableFrom);
       fData.append("availableTo", formData.availableTo);
-      fData.append("status", formData.status);
+      fData.append("status", formData.isActive ? "active" : "inactive");
 
       let images = formData.images;
 

@@ -52,6 +52,11 @@ const ProductCard = ({ product, onClick }: any) => {
           <p className="text-green-600 text-[20px] mb-3 line-clamp-2 font-bold">
             Rs.{product.Varients[0].price}
           </p>
+          {product.status === "inactive" && (
+            <p className="text-red-600 text-xs sm:text-sm mb-3 line-clamp-2">
+              This item is currently unavailable
+            </p>
+          )}
           {addedProduct && (
             <p className="text-green-600 dark:text-green-300 text-xs sm:text-sm mb-3 line-clamp-2">
               {addedProduct.quantity} Item added to order

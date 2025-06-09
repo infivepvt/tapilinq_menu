@@ -88,6 +88,8 @@ export const addProduct = asyncHandler(async (req, res) => {
     }
   }
 
+  console.log(status);
+
   const newProduct = await Product.create({
     name: title,
     description,
@@ -95,7 +97,7 @@ export const addProduct = asyncHandler(async (req, res) => {
     status,
     from: availableFrom,
     to: availableTo,
-    timePeriod: useTimePeriod ? 1 : 0,
+    timePeriod: JSON.parse(useTimePeriod) ? 1 : 0,
   });
 
   for (let i = 0; i < productImageFiles.length; i++) {
@@ -354,7 +356,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
     status,
     from: availableFrom,
     to: availableTo,
-    timePeriod: useTimePeriod ? 1 : 0,
+    timePeriod: JSON.parse(useTimePeriod) ? 1 : 0,
   });
 
   // DELETE PRODUCT IMAGES
@@ -562,7 +564,7 @@ export const getActiveProducts = asyncHandler(async (req, res) => {
   const { category, search } = req.query;
   const products = await Product.findAll({
     where: {
-      status: "active",
+      // status: "active",
       ...(search && search.trim().length > 0
         ? { name: { [Op.like]: `%${search}%` } }
         : {}),

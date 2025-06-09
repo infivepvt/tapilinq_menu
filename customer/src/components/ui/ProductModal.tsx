@@ -34,6 +34,9 @@ interface Product {
   Images: { path: string }[];
   Varients: Variant[];
   Category: { name: string };
+  timePeriod?: number;
+  availableFrom?: string;
+  availableTo?: string;
 }
 
 interface CartItem {
@@ -54,11 +57,8 @@ interface ProductModalProps {
 const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
-  const [showQuantityConfirmation, setShowQuantityConfirmation] =
-    useState(false);
-  const [selectedVariant, setSelectedVariant] = useState<Variant>(
-    product.Varients[0] || {}
-  );
+  const [showQuantityConfirmation, setShowQuantityConfirmation] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState<Variant>(product.Varients[0] || {});
   const [addedIngredients, setAddedIngredients] = useState<string[]>([]);
   const [removedIngredients, setRemovedIngredients] = useState<string[]>([]);
   const [specialNote, setSpecialNote] = useState("");
@@ -67,6 +67,8 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
   const [sc, setSc] = useState(0);
   const [tax, setTax] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const isInactive = product.status === "inactive";
 
   useEffect(() => {
     const taxData = localStorage.getItem("tax") || "0";
@@ -83,36 +85,34 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
   if (!isOpen) return null;
 
   const handleAddIngredient = (id: any, ingredient: string, price: any) => {
+    if (isInactive) return;
     let ing = addedIngredients.find((e) => e.id === id);
     if (ing) {
       setAddedIngredients([...addedIngredients.filter((i) => i.id !== id)]);
     } else {
-      setAddedIngredients([
-        ...addedIngredients,
-        { id, name: ingredient, price },
-      ]);
+      setAddedIngredients([...addedIngredients, { id, name: ingredient, price }]);
     }
   };
 
   const handleRemoveIngredient = (id: any, ingredient: string, price: any) => {
+    if (isInactive) return;
     let ing = removedIngredients.find((e) => e.id === id);
     if (ing) {
       setRemovedIngredients([...removedIngredients.filter((i) => i.id !== id)]);
     } else {
-      setRemovedIngredients([
-        ...removedIngredients,
-        { id, name: ingredient, price },
-      ]);
+      setRemovedIngredients([...removedIngredients, { id, name: ingredient, price }]);
     }
   };
 
   const handleVariantChange = (variant: Variant) => {
+    if (isInactive) return;
     setSelectedVariant(variant);
     setAddedIngredients([]);
     setRemovedIngredients([]);
   };
 
   const handleQuantityChange = (value: number) => {
+    if (isInactive) return;
     const newQuantity = Math.max(1, value);
     setQuantity(newQuantity);
     if (newQuantity.toString().length > 2) {
@@ -123,15 +123,18 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
   };
 
   const confirmQuantity = () => {
+    if (isInactive) return;
     setShowQuantityConfirmation(false);
   };
 
   const cancelQuantity = () => {
+    if (isInactive) return;
     setQuantity(0);
     setShowQuantityConfirmation(false);
   };
 
   const handleAddToCart = () => {
+    if (isInactive) return;
     if (quantity.toString().length > 2) {
       setShowQuantityConfirmation(true);
       return;
@@ -159,30 +162,41 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
   };
 
   const calculateTotalPrice = () => {
-    const extraIngredientsTotal = addedIngredients.reduce(
-      (total, ingredient) => {
-        const extraIng = product.ExtraItems?.find(
-          (ei) => ei.id === ingredient.id
-        );
-        return total + (extraIng?.price || 0);
-      },
-      0
-    );
+    const extraIngredientsTotal = addedIngredients.reduce((total, ingredient) => {
+      const extraIng = product.ExtraItems?.find((ei) => ei.id === ingredient.id);
+      return total + (extraIng?.price || 0);
+    }, 0);
 
     return (parseFloat(selectedVariant.price) + extraIngredientsTotal) * quantity;
   };
 
   // Carousel navigation handlers
   const handlePrevImage = () => {
+    if (isInactive) return;
     setCurrentImageIndex((prev) => 
       prev === 0 ? product.Images.length - 1 : prev - 1
     );
   };
 
   const handleNextImage = () => {
+    if (isInactive) return;
     setCurrentImageIndex((prev) => 
       prev === product.Images.length - 1 ? 0 : prev + 1
     );
+  };
+
+  // Format time period
+  const formatTime = (time: string | undefined) => {
+    if (!time) return "N/A";
+    try {
+      const [hours, minutes] = time.split(":");
+      const hourNum = parseInt(hours);
+      const ampm = hourNum >= 12 ? "PM" : "AM";
+      const formattedHour = hourNum % 12 || 12;
+      return `${formattedHour}:${minutes} ${ampm}`;
+    } catch {
+      return time;
+    }
   };
 
   return (
@@ -201,14 +215,15 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
                 <img
                   src={`${UPLOADS_URL}${product.Images[currentImageIndex]?.path}`}
                   alt={`${product.name} - Image ${currentImageIndex + 1}`}
-                  className="w-full h-64 object-cover"
+                  className={`w-full h-64 object-cover ${isInactive ? 'opacity-50' : ''}`}
                 />
-                {product.Images.length > 1 && (
+                {product.Images.length > 1 && !isInactive && (
                   <>
                     <button
                       className="absolute top-1/2 left-4 transform -translate-y-1/2 p-2 bg-white/80 dark:bg-gray-900/80 rounded-full text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition-all"
                       onClick={handlePrevImage}
                       aria-label="Previous image"
+                      disabled={isInactive}
                     >
                       <ChevronLeft size={20} />
                     </button>
@@ -216,6 +231,7 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
                       className="absolute top-1/2 right-4 transform -translate-y-1/2 p-2 bg-white/80 dark:bg-gray-900/80 rounded-full text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition-all"
                       onClick={handleNextImage}
                       aria-label="Next image"
+                      disabled={isInactive}
                     >
                       <ChevronRight size={20} />
                     </button>
@@ -224,12 +240,11 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
                         <button
                           key={index}
                           className={`w-2 h-2 rounded-full ${
-                            currentImageIndex === index
-                              ? "bg-white"
-                              : "bg-white/50"
+                            currentImageIndex === index ? "bg-white" : "bg-white/50"
                           }`}
                           onClick={() => setCurrentImageIndex(index)}
                           aria-label={`Go to image ${index + 1}`}
+                          disabled={isInactive}
                         />
                       ))}
                     </div>
@@ -249,7 +264,14 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
               <X size={20} />
             </button>
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
-              <h2 className="text-white text-2xl font-bold">{product.name}</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-white text-2xl font-bold">{product.name}</h2>
+                {isInactive && (
+                  <span className="text-red-400 text-sm font-medium bg-red-900/30 px-2 py-1 rounded">
+                    Not Available
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -264,6 +286,14 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
             </span>
           </div>
 
+          {parseInt(product.timePeriod) === 1 && product.from && product.to && (
+            <div className="mb-4 bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Available: {formatTime(product.from)} - {formatTime(product.to)}
+              </p>
+            </div>
+          )}
+
           <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mb-6">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
               Select Variant
@@ -276,8 +306,9 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
                     selectedVariant.id === variant.id
                       ? "bg-blue-600 text-white"
                       : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                  } hover:bg-blue-500 hover:text-white transition-colors`}
+                  } hover:bg-blue-500 hover:text-white transition-colors ${isInactive ? 'opacity-50 cursor-not-allowed' : ''}`}
                   onClick={() => handleVariantChange(variant)}
+                  disabled={isInactive}
                 >
                   {variant.name}
                 </button>
@@ -289,8 +320,7 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
             {selectedVariant.description || product.description}
           </p>
 
-          {product.ExtraItems?.filter((i) => i.type === "remove").length >
-            0 && (
+          {product.ExtraItems?.filter((i) => i.type === "remove").length > 0 && (
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mb-6">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
                 Exclude Ingredients
@@ -301,19 +331,14 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
                     <div key={index} className="flex items-center">
                       <button
                         className={`flex items-center space-x-2 px-3 py-1.5 rounded-full ${
-                          removedIngredients.find(
-                            (i) => i.name === ingredient.name
-                          )
+                          removedIngredients.find((i) => i.name === ingredient.name)
                             ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 line-through"
                             : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                        }`}
+                        } ${isInactive ? 'opacity-50 cursor-not-allowed' : ''}`}
                         onClick={() =>
-                          handleRemoveIngredient(
-                            ingredient.id,
-                            ingredient.name,
-                            ingredient.price
-                          )
+                          handleRemoveIngredient(ingredient.id, ingredient.name, ingredient.price)
                         }
+                        disabled={isInactive}
                       >
                         {ingredient.image && (
                           <img
@@ -345,14 +370,11 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
                         addedIngredients.find((i) => i.name === ingredient.name)
                           ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
                           : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                      }`}
+                      } ${isInactive ? 'opacity-50 cursor-not-allowed' : ''}`}
                       onClick={() =>
-                        handleAddIngredient(
-                          ingredient.id,
-                          ingredient.name,
-                          ingredient.price
-                        )
+                        handleAddIngredient(ingredient.id, ingredient.name, ingredient.price)
                       }
+                      disabled={isInactive}
                     >
                       {ingredient.image && (
                         <img
@@ -377,20 +399,26 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
               Special Instructions
             </h3>
             <textarea
-              className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                isInactive ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
               rows={3}
               placeholder="Any special requests for this item..."
               value={specialNote}
               onChange={(e) => setSpecialNote(e.target.value)}
+              disabled={isInactive}
             />
           </div>
 
           <div className="border-t border-gray-200 dark:border-gray-700 pt-6 space-y-4">
             <div className="flex items-center justify-center space-x-4">
               <button
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                className={`w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors ${
+                  isInactive ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
                 onClick={() => handleQuantityChange(quantity - 1)}
                 aria-label="Decrease quantity"
+                disabled={isInactive}
               >
                 <Minus size={16} />
               </button>
@@ -398,22 +426,26 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
                 type="number"
                 min="1"
                 value={quantity}
-                onChange={(e) =>
-                  handleQuantityChange(parseInt(e.target.value) || 1)
-                }
-                className="w-20 text-center border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
+                className={`w-20 text-center border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  isInactive ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
                 aria-label="Quantity"
+                disabled={isInactive}
               />
               <button
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                className={`w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors ${
+                  isInactive ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
                 onClick={() => handleQuantityChange(quantity + 1)}
                 aria-label="Increase quantity"
+                disabled={isInactive}
               >
                 <Plus size={16} />
               </button>
             </div>
 
-            {showQuantityConfirmation && (
+            {showQuantityConfirmation && !isInactive && (
               <div className="bg-yellow-100 dark:bg-yellow-900/30 p-4 rounded-lg text-center">
                 <p className="text-yellow-800 dark:text-yellow-200 mb-2">
                   Are you sure you want to order {quantity} items?
@@ -436,8 +468,11 @@ const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
             )}
 
             <button
-              className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors mt-[50px]"
+              className={`w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors mt-[50px] ${
+                isInactive ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
               onClick={handleAddToCart}
+              disabled={isInactive}
             >
               Add to Order · Rs. {calculateTotalPrice().toFixed(2)}
             </button>
